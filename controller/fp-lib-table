@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "controller")(type "KiCad")(uri "/Users/philipp/work/electronics_and_tech/reflow-oven/controller.pretty")(options "")(descr ""))
+)
