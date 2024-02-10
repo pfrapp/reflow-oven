@@ -13,8 +13,10 @@ module box() {
     translate([-60,-40,0])
         difference() {
             cube([120,80,25]);
-            translate([5,5,5])
-                cube([110,70,20]);
+            translate([0,3,3])
+                cube([115,74,22]);
+            translate([0,0,3])
+                cube([40,80,22]);
         }
 }
 
