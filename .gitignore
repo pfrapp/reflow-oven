@@ -1,3 +1,6 @@
 *.zip
 
 /controller/*.zip
+
+/box/box.stl
+/box/fab
