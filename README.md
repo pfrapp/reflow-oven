@@ -102,5 +102,35 @@ We use an Arduino Uno.
 
 ## Controller PCB
 
+### First version
+
+The first version (revision 1.0.0) of the board has some flaws:
+* The transistor connection between collector and emitter is shorted. Potential reasons
+    * Solder bridges
+    * Defect part
+    * Defect board
+  
+  As a consequence, the red LED is always on.
+* The yellow LED is not bright enough with 3.3 V (not even with 5.0 V)
+* The LEDs have a much higher forward voltage than I thought they have (red and yellow around 2 V,
+  green even 3.3 V)
+* Not enough voltage to drive the relay
+
+  Note: The voltage between TP4 and TP5 is 0.566 V, which (at 22 Ohm) corresponds to 25.7 mA.
+  According to the datasheet of the 333-2SURC/S400-A8 (red LED), the forward voltage is 2 V, which
+  is also what I measured.
+
+
+Analysis of the defects:
+
+* To address the shorted transistor:
+    * Leave for some space between PCB and transistor to reduce the chance of solder bridges
+    * Measure another PCB
+    * Change the part
+* To address the yellow LED: reduce value of R1 (smaller than 1k)
+* To have enough voltage for driving the relay (without removing the red LED and replace it by a connection):
+    Use +7 V instead of + 5 V to drive the relay.
+* Also: Use less current wherever possible for the LEDs. Measure what current they need to be "bright".
+
 ## Controller software
 
