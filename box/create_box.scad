@@ -4,6 +4,16 @@
 // Bohrmuster: 82 x 52
 // Rand: 10 links (hin zum uC), 20 rechts (hin zum Ofen und Netzspannung)
 
+// Notwendige Aenderungen:
+// - 20 mm mehr Platz hin zum Stromanschluss
+// - Loecher muessen deutlich hoeher sein
+// - Wand  muss 10 mm hoeher sein
+// - Bohrungen fuer Deckel vorsehen
+// - Befestigung fuer uC vorsehen
+// - Platz fuer Temperaturmessverstaerker vorsehen
+// - Anschluss fuer Temperatursensor vorsehen
+
+
 g_fn = 90;
 
 // Nominell 8 mm (gemessen), plus 0.2 mm Toleranz wg. 3D Drucker
