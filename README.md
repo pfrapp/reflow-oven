@@ -132,5 +132,26 @@ Analysis of the defects:
     Use +7 V instead of + 5 V to drive the relay.
 * Also: Use less current wherever possible for the LEDs. Measure what current they need to be "bright".
 
+Measurements
+* 5 V supply voltage
+    * TP3 shows 4.9 V
+    * TP4 shows 2.975 V
+    * TP5 shows 2.420 V
+    * R2 measures 21.9 Ohm (between TP4 and TP5)
+    * R3 measures 0.99 kOhm
+    * Current through red LED: U = R*I --> I = U/R = (2.975-2.420) V / 22 Ohm = 0.555 V / 22 Ohm = 25.23 mA
+    * Voltage drop over red LED: 4.9 V - 2.975 V = 1.925 V
+    * Voltage between R3 and D3: 2.500 V
+    * Voltage drop over R2: 4.9 V - 2.500 V = 2.4 V
+    * Voltage drop over D3: 2.5 V
+    * Current through green LED: U = R*I --> I = U/R = 2.4 V / 990 Ohm = 2.42 mA
+    * Voltage drop over yellow LED (when bright) is 2 V
+    * The yellow LED needs 10 mA to be bright
+    * Base Emitter Voltage of Transistor is 0.75 V
+  
+Set R1 to 56 Ohm?
+
+Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
+
 ## Controller software
 
