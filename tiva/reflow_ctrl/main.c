@@ -60,17 +60,22 @@ int main(void)
     // Green: PF3
     // Blue: PF2
     // Red: PF1
+    // For usage with the relay: PF4
     //
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_4|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1);
     turnOffRedLed();
     turnOffGreenLed();
     turnOffBlueLed();
 
     while(true) {
+        // Put voltage on pin PF4.
+        // Tested via measurement: works.
         SysCtlDelay(SysCtlClockGet() / 2);
         turnOnBlueLed();
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_4);
         SysCtlDelay(SysCtlClockGet() / 2);
         turnOffBlueLed();
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_0);
     }
 
 
