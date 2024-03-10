@@ -4,3 +4,11 @@
 
 /box/box.stl
 /box/fab
+
+# Tiva
+/tiva/RemoteSystemsTempFiles/
+/tiva/.jxbrowser.userdata/
+/tiva/reflow_ctrl/.launches/
+/tiva/reflow_ctrl/.settings/
+/tiva/reflow_ctrl/Debug/
+/tiva/.gitignore
