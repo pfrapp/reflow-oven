@@ -12,3 +12,7 @@
 /tiva/reflow_ctrl/.settings/
 /tiva/reflow_ctrl/Debug/
 /tiva/.gitignore
+
+# Host
+/host/signals.log
+/host/tiva_usb_connect
