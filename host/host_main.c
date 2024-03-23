@@ -26,29 +26,6 @@ long long getMilliSecondsSinceEpoch() {
     return ms;
 }
 
-int test_timing() {
-
-    int a = 0;
-
-    long long start_ms, end_ms;
-    long long diff_ms;
-
-    start_ms = getMilliSecondsSinceEpoch();
-
-    // Wait for 500 ms.
-    while(1) {
-        end_ms = getMilliSecondsSinceEpoch();
-        diff_ms = end_ms - start_ms;
-        if (diff_ms >= 500) {
-            break;
-        }
-    }
-
-    printf("It took %lli ms\n", diff_ms);
-
-    return 0;
-}
-
 int logSignalSample(FILE *log_fid, int index, int time_ms,
                     usb_serial_data_pc_to_tiva *usb_packet_to_tiva,
                     usb_serial_data_tiva_to_pc *usb_packet_from_tiva,
@@ -289,87 +266,5 @@ int main(void)
     close(serial_port);
     printf("* Closed the serial port and log file.\n");
     printf("* Finished cleanly -- bye.\n");
-    return 0;
-}
-
-// Set the USB serial data structure to a motor speed that we specify in percent
-// as well as a direction (0 or 1).
-int setMotorSpeedPercentageAndDirection(usb_serial_data_pc_to_tiva *dat, const int speed_percent, const int direction)
-{
-    uint16_t width;
-    // Clear MSB in case it is set.
-    uint16_t msb_flag = 1 << 15;
-    uint16_t msb_removal_flag = ~msb_flag;
-    // msb_removal_flag = 0x7FFF
-
-    double speed = 0.01 * speed_percent;
-    // This is necessary as we invert the PWM.
-    // Also, a PWM width of 0 does not result in a duty cycle of zero (before inversion).
-    // A width of zero actually results in a duty cycle of 100% (not inverted), or 0% (inverted).
-    if (speed > 0.99)
-    {
-        speed = 0.99;
-    }
-    speed = 1.0 - speed;
-    // printf("speed=%f\n", speed);
-    width = (uint16_t)(speed * msb_removal_flag);
-    // printf("width = %i\n", width);
-
-    dat->motor = width & msb_removal_flag;
-
-    // Set the direction.
-    if (direction)
-    {
-        dat->motor = dat->motor | msb_flag;
-    }
-
-    return 0;
-}
-
-int askForMotorPercentageAndDirection(int *speed_percent, int *direction)
-{
-    // Error code of scanf call.
-    int err = 0;
-
-    if (!speed_percent || !direction) {
-        return -1;
-    }
-
-    // Ask for the motor percentage.
-    printf("Enter percentage (negative value to abort):\n>>> ");
-    err = scanf("%i", speed_percent);
-    if (err != 1) {
-        fprintf(stderr, "### Invalid input (must be an integer value)!\n");
-        return -1;
-    }
-
-    if (*speed_percent < 0)
-    {
-        printf("Negative value --> aborting\n");
-        return 1;
-    }
-
-    printf("Enter the direction (0 or 1):\n>>> ");
-    err = scanf("%i", direction);
-    if (err != 1) {
-        fprintf(stderr, "### Invalid input (must be an integer value)!\n");
-        return -1;
-    }
-    
-
-    // Sanitize inputs.
-    if ((*speed_percent < 0) || (*speed_percent > 100))
-    {
-        fprintf(stderr, "### Invalid motor percentage (must be between 0 and 100)!\n");
-        return 1;
-    }
-    if ((*direction != 0) && (*direction != 1))
-    {
-        fprintf(stderr, "### Invalid direction (must be 0 or 1)!\n");
-        return 1;
-    }
-
-    printf("Selected %i percent (direction %i).\n", *speed_percent, *direction);
-
     return 0;
 }
