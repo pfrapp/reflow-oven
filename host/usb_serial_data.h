@@ -36,9 +36,11 @@ typedef struct usb_serial_data_tiva_to_pc_ {
     uint8_t press_lsb;    // 0xF8
     uint8_t press_xlsb;    // 0xF9
 
-    // 6 bytes, so adding 2 padding bytes to align on 32-bit boundary.
+    // Power mode
+    uint8_t power_mode;
+
+    // 7 bytes, so adding 1 padding byte to align on 32-bit boundary.
     uint8_t padding1;
-    uint8_t padding2;
 
 
 } usb_serial_data_tiva_to_pc;
