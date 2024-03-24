@@ -19,6 +19,7 @@
 #include "logging.h"
 #include "timing.h"
 #include "usb_serial.h"
+#include "bmp.h"
 
 
 
@@ -64,6 +65,11 @@ int main(void)
     // File for logging measurement signals to.
     FILE *log_fid;
     int first_log_call;
+
+    // BMP structures
+    struct bmp2_dev bmp_device;
+    struct bmp2_uncomp_data raw_bmp_data;
+    struct bmp2_data physical_bmp_data;
 
 
     // Init logging
@@ -123,6 +129,44 @@ int main(void)
             usb_packet_from_tiva.temp_msb,
             usb_packet_from_tiva.temp_lsb,
             usb_packet_from_tiva.temp_xlsb);
+
+        bmp_device.calib_param.dig_t1 = usb_packet_from_tiva.dig_T1;
+        bmp_device.calib_param.dig_t2 = usb_packet_from_tiva.dig_T2;
+        bmp_device.calib_param.dig_t3 = usb_packet_from_tiva.dig_T3;
+
+        bmp_device.calib_param.dig_p1 = usb_packet_from_tiva.dig_P1;
+        bmp_device.calib_param.dig_p2 = usb_packet_from_tiva.dig_P2;
+        bmp_device.calib_param.dig_p3 = usb_packet_from_tiva.dig_P3;
+        bmp_device.calib_param.dig_p4 = usb_packet_from_tiva.dig_P4;
+        bmp_device.calib_param.dig_p5 = usb_packet_from_tiva.dig_P5;
+        bmp_device.calib_param.dig_p6 = usb_packet_from_tiva.dig_P6;
+        bmp_device.calib_param.dig_p7 = usb_packet_from_tiva.dig_P7;
+        bmp_device.calib_param.dig_p8 = usb_packet_from_tiva.dig_P8;
+        bmp_device.calib_param.dig_p9 = usb_packet_from_tiva.dig_P9;
+        bmp_device.calib_param.dig_p10 = 0; // seems to not be used anyway
+
+        raw_bmp_data.temperature = ((usb_packet_from_tiva.temp_xlsb & 0xF0) >> 4)
+                                   | (usb_packet_from_tiva.temp_lsb << 4)
+                                   | (usb_packet_from_tiva.temp_msb << (8+4));
+        raw_bmp_data.pressure = ((usb_packet_from_tiva.press_xlsb & 0xF0) >> 4)
+                                   | (usb_packet_from_tiva.press_lsb << 4)
+                                   | (usb_packet_from_tiva.press_msb << (8+4));
+
+        printf("Trimming values:\n");
+        printf("dig_T1 = %u\n", bmp_device.calib_param.dig_t1);
+        printf("dig_T2 = %i\n", bmp_device.calib_param.dig_t2);
+        printf("dig_T3 = %i\n", bmp_device.calib_param.dig_t3);
+        printf("dig_P1 = %u\n", bmp_device.calib_param.dig_p1);
+        printf("dig_P2 = %i\n", bmp_device.calib_param.dig_p2);
+        printf("dig_P3 = %i\n", bmp_device.calib_param.dig_p3);
+        printf("----------\n");
+        printf("Temperature: 0x%08X (%u)\n", raw_bmp_data.temperature, raw_bmp_data.temperature);
+        printf("Pressure: 0x%08X (%u)\n", raw_bmp_data.pressure, raw_bmp_data.pressure);
+
+        bmp2_compensate_data(&raw_bmp_data, &physical_bmp_data, &bmp_device);
+
+        printf("Physical temperature: %f\n", physical_bmp_data.temperature);
+        printf("Physical pressure: %f\n", physical_bmp_data.pressure);
 
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();

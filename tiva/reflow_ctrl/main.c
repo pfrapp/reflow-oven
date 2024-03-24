@@ -504,6 +504,7 @@ int main(void)
     uint8_t ui8PressureValues[3];
     uint8_t ui8ControlRegisterValue;
     uint8_t ui8ConfigRegisterValue;
+    uint8_t ui8TrimmingValues[24];
 
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
                        SYSCTL_XTAL_16MHZ);
@@ -585,6 +586,23 @@ int main(void)
     ui8ConfigRegisterValue = 0x10 << 2;
     writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, ui8ControlRegisterValue);
     writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER, ui8ConfigRegisterValue);
+
+    // Read the trimming values (calibration values).
+    // The LSB comes first.
+    readConsecutiveIMURegisters(0x88, 24, ui8TrimmingValues);
+    usb_packet_sent.dig_T1 = (uint16_t) ((ui8TrimmingValues[0] << 0) + (ui8TrimmingValues[1] << 8));
+    usb_packet_sent.dig_T2 = (int16_t) ((ui8TrimmingValues[2] << 0) + (ui8TrimmingValues[3] << 8));
+    usb_packet_sent.dig_T3 = (int16_t) ((ui8TrimmingValues[4] << 0) + (ui8TrimmingValues[5] << 8));
+
+    usb_packet_sent.dig_P1 = (uint16_t) ((ui8TrimmingValues[6] << 0) + (ui8TrimmingValues[7] << 8));
+    usb_packet_sent.dig_P2 = (int16_t) ((ui8TrimmingValues[8] << 0) + (ui8TrimmingValues[9] << 8));
+    usb_packet_sent.dig_P3 = (int16_t) ((ui8TrimmingValues[10] << 0) + (ui8TrimmingValues[11] << 8));
+    usb_packet_sent.dig_P4 = (int16_t) ((ui8TrimmingValues[12] << 0) + (ui8TrimmingValues[13] << 8));
+    usb_packet_sent.dig_P5 = (int16_t) ((ui8TrimmingValues[14] << 0) + (ui8TrimmingValues[15] << 8));
+    usb_packet_sent.dig_P6 = (int16_t) ((ui8TrimmingValues[16] << 0) + (ui8TrimmingValues[17] << 8));
+    usb_packet_sent.dig_P7 = (int16_t) ((ui8TrimmingValues[18] << 0) + (ui8TrimmingValues[19] << 8));
+    usb_packet_sent.dig_P8 = (int16_t) ((ui8TrimmingValues[20] << 0) + (ui8TrimmingValues[21] << 8));
+    usb_packet_sent.dig_P9 = (int16_t) ((ui8TrimmingValues[22] << 0) + (ui8TrimmingValues[23] << 8));
 
 
     //
