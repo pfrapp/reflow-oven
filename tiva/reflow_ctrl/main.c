@@ -27,6 +27,7 @@
 #define TEMPERATURE_SENSOR_PERIPHERAL_I2C_ADDRESS 0x76
 #define TEMPERATURE_SENSOR_REGISTER_WHO_AM_I 0xD0
 #define TEMPERATURE_SENSOR_TEMPERATURE_MSB 0xFA
+#define TEMPERATURE_SENSOR_PRESSURE_MSB 0xF7
 #define TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER 0xF4
 #define TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER 0xF5
 
@@ -500,6 +501,7 @@ int main(void)
     uint32_t ui32TxCount;
     uint32_t ui32RxCount;
     uint8_t ui8TemperatureValues[3];
+    uint8_t ui8PressureValues[3];
     uint8_t ui8ControlRegisterValue;
     uint8_t ui8ConfigRegisterValue;
 
@@ -635,11 +637,16 @@ int main(void)
 
         // Read the temperature measurement from the sensor
         readConsecutiveIMURegisters(TEMPERATURE_SENSOR_TEMPERATURE_MSB, 3, ui8TemperatureValues);
+        // Read the pressure measurement from the sensor
+        readConsecutiveIMURegisters(TEMPERATURE_SENSOR_PRESSURE_MSB, 3, ui8PressureValues);
 
         // Fill out the USB-struct
         usb_packet_sent.temp_msb = ui8TemperatureValues[0];
         usb_packet_sent.temp_lsb = ui8TemperatureValues[1];
         usb_packet_sent.temp_xlsb = ui8TemperatureValues[2];
+        usb_packet_sent.press_msb = ui8PressureValues[0];
+        usb_packet_sent.press_lsb = ui8PressureValues[1];
+        usb_packet_sent.press_xlsb = ui8PressureValues[2];
 
         //
         // Have we been asked to update the status display?
