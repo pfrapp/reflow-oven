@@ -172,10 +172,10 @@ int main(void)
     }
 
     milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
-    // Sample time of 5 ms, corresponding to 200 Hz.
-    sample_time_ms = 5;
+    // Sample time of 500 ms, corresponding to 2 Hz.
+    sample_time_ms = 500;
     sample_index = 0;
-    max_runtime_seconds = 20;
+    max_runtime_seconds = 10;
 
 
     while (1)
