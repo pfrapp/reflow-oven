@@ -10,21 +10,19 @@ int logSignalSample(FILE *log_fid, int index, int time_ms,
     }
 
     if (bWriteHeader) {
-        fprintf(log_fid, "Index,Time (ms),Motor,AccelX,AccelY,AccelZ,GyroX,GyroY,GyroZ,QuadraturePosition,QuadratureVelocity\n");
+        fprintf(log_fid, "Index,Time (ms),Motor,temp_msb,temp_lsb,temp_xlsb,press_msb,press_lsb,press_xlsb\n");
     }
 
     //
-    fprintf(log_fid, "%05i,%09i,0x%04x,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%04X,0x%08X,0x%08X\n",
+    fprintf(log_fid, "%05i,%09i,0x%04x,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X\n",
             index, time_ms,
             usb_packet_to_tiva->motor,
-            usb_packet_from_tiva->accel_x,
-            usb_packet_from_tiva->accel_y,
-            usb_packet_from_tiva->accel_z,
-            usb_packet_from_tiva->gyro_x,
-            usb_packet_from_tiva->gyro_y,
-            usb_packet_from_tiva->gyro_z,
-            usb_packet_from_tiva->quadrature_position,
-            usb_packet_from_tiva->quadrature_velocity);
+            usb_packet_from_tiva->temp_msb,
+            usb_packet_from_tiva->temp_lsb,
+            usb_packet_from_tiva->temp_xlsb,
+            usb_packet_from_tiva->press_msb,
+            usb_packet_from_tiva->press_lsb,
+            usb_packet_from_tiva->press_xlsb);
 
     return 0;
 }
