@@ -508,6 +508,10 @@ int main(void)
         turnOffBlueLed();
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_0);
 
+        usb_packet_sent.temp_msb = 0x03;
+        usb_packet_sent.temp_lsb = 0x04;
+        usb_packet_sent.temp_xlsb = 0x05;
+
         //
         // Have we been asked to update the status display?
         //

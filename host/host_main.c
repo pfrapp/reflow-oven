@@ -66,10 +66,6 @@ int main(void)
     int first_log_call;
 
 
-    // Initialize the motor speed percentage and direction.
-    speed_percent = 0;
-    direction = 0;
-
     // Init logging
     log_fid = fopen("signals.log", "w");
     first_log_call = 1;
@@ -110,34 +106,22 @@ int main(void)
 
     while (1)
     {
-            float time_sec;
-            int16_t acc_x;
-            int16_t acc_y;
-            int16_t gyro_z;
+        float time_sec;
 
-            // Idle (wait) until the sampling interval is over.
-            // Perhaps a callback function is more appropriate in the long term.
-            do {
-                current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
-                diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
-            } while (diff_ms < sample_index*sample_time_ms);
 
-            time_sec = 0.001f * diff_ms;
-            acc_x = (int16_t) usb_packet_from_tiva.accel_x;
-            acc_y = (int16_t) usb_packet_from_tiva.accel_y;
-            gyro_z = (int16_t) usb_packet_from_tiva.gyro_z;
-            speed_percent = 0;
+        // Idle (wait) until the sampling interval is over.
+        // Perhaps a callback function is more appropriate in the long term.
+        do {
+            current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
+            diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
+        } while (diff_ms < sample_index*sample_time_ms);
 
-            if (speed_percent < 0) {
-                speed_percent = -speed_percent;
-                direction = 1;
-            } else {
-                direction = 0;
-            }
-            // Limit the motor speed to 98 percent.
-            if (speed_percent > 98) {
-                speed_percent = 98;
-            }
+        time_sec = 0.001f * diff_ms;
+
+        printf("Temperature: 0x%02X,0x%02X,0x%02X\n",
+            usb_packet_from_tiva.temp_msb,
+            usb_packet_from_tiva.temp_lsb,
+            usb_packet_from_tiva.temp_xlsb);
 
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
