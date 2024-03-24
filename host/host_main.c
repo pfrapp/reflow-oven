@@ -118,6 +118,7 @@ int main(void)
 
         time_sec = 0.001f * diff_ms;
 
+        printf("Power mode: 0x%02X\n", usb_packet_from_tiva.power_mode);
         printf("Temperature: 0x%02X,0x%02X,0x%02X\n",
             usb_packet_from_tiva.temp_msb,
             usb_packet_from_tiva.temp_lsb,

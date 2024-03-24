@@ -26,6 +26,9 @@
 
 #define TEMPERATURE_SENSOR_PERIPHERAL_I2C_ADDRESS 0x76
 #define TEMPERATURE_SENSOR_REGISTER_WHO_AM_I 0xD0
+#define TEMPERATURE_SENSOR_TEMPERATURE_MSB 0xFA
+#define TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER 0xF4
+#define TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER 0xF5
 
 
 //*****************************************************************************
@@ -84,6 +87,28 @@ static void turnOffBlueLed() {
     GPIOPinWrite(GPIO_PORTF_BASE, pin, 0);
 }
 
+int writeIMURegister(const uint8_t ui8_register, const uint8_t ui8_value) {
+
+    //
+    // See https://forum.digikey.com/t/i2c-communication-with-the-ti-tiva-tm4c123gxl/13451
+    //
+
+    // Set the third argument to false, as we want to write to the peripheral.
+    // The third argument is the read/not write flag.
+    // read/not write = false <==> not read/write = true
+    I2CMasterSlaveAddrSet(I2C1_BASE, TEMPERATURE_SENSOR_PERIPHERAL_I2C_ADDRESS, false);
+
+    I2CMasterDataPut(I2C1_BASE, ui8_register);
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_START);
+    while (I2CMasterBusy(I2C1_BASE)) { } // note: not BusBusy, but Busy
+
+    I2CMasterDataPut(I2C1_BASE, ui8_value);
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_SEND_FINISH);
+    while (I2CMasterBusy(I2C1_BASE)) { } // note: not BusBusy, but Busy
+
+    return 0;
+}
+
 int readIMURegister(const uint8_t ui8_register, uint8_t *ui8_value) {
 
     uint32_t ui32_received = 0;
@@ -117,6 +142,74 @@ int readIMURegister(const uint8_t ui8_register, uint8_t *ui8_value) {
     }
 
     *ui8_value = (uint8_t) (0x000000FF & ui32_received);
+
+    return 0;
+}
+
+
+
+//! Read N consecutive registers.
+int readConsecutiveIMURegisters(const uint8_t ui8_register, const unsigned int N, uint8_t *ui8_values) {
+    
+    uint32_t ui32_received = 0;
+    unsigned int idx = 0;
+    unsigned int loop_counter = 0;
+
+    // Opposed to readIMURegister, not not actually issue any I2C bus commands
+    // if the given values pointer is NULL.
+    // This means that this very function readConsecutiveIMURegisters can _not_
+    // be used to just look at the bus traffic on the scope when
+    // setting ui8_values to NULL.
+    if (!ui8_values) {
+        return -1;
+    }
+
+    //
+    // See https://forum.digikey.com/t/i2c-communication-with-the-ti-tiva-tm4c123gxl/13451
+    //
+    
+    // If we are only requested to read N = 1 registers, dispatch
+    // to the corresponding function.
+    if (N == 1) {
+        return readIMURegister(ui8_register, ui8_values);
+    }
+
+
+    // Set the third argument to false, as we want to write to the peripheral.
+    // The third argument is the read/not write flag.
+    // read/not write = false <==> not read/write = true
+    I2CMasterSlaveAddrSet(I2C1_BASE, TEMPERATURE_SENSOR_PERIPHERAL_I2C_ADDRESS, false);
+    I2CMasterDataPut(I2C1_BASE, ui8_register);
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_SINGLE_SEND);
+
+    while(I2CMasterBusy(I2C1_BASE)) {}
+
+    //
+    // Now read the values.
+    //
+    idx = 0;
+
+    I2CMasterSlaveAddrSet(I2C1_BASE, TEMPERATURE_SENSOR_PERIPHERAL_I2C_ADDRESS, true);
+
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_RECEIVE_START);
+    while(I2CMasterBusy(I2C1_BASE)) {}
+    ui32_received = I2CMasterDataGet(I2C1_BASE);
+    ui8_values[idx] = (uint8_t) (0x000000FF & ui32_received);
+    idx += 1;
+
+    for (loop_counter = 1; loop_counter < (N-1); loop_counter++) {
+        I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_RECEIVE_CONT);
+        while(I2CMasterBusy(I2C1_BASE)) {}
+        ui32_received = I2CMasterDataGet(I2C1_BASE);
+        ui8_values[idx] = (uint8_t) (0x000000FF & ui32_received);
+        idx += 1;
+    }
+
+    I2CMasterControl(I2C1_BASE, I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
+    while(I2CMasterBusy(I2C1_BASE)) {}
+    ui32_received = I2CMasterDataGet(I2C1_BASE);
+    ui8_values[idx] = (uint8_t) (0x000000FF & ui32_received);
+    idx += 1;
 
     return 0;
 }
@@ -406,6 +499,9 @@ int main(void)
 {
     uint32_t ui32TxCount;
     uint32_t ui32RxCount;
+    uint8_t ui8TemperatureValues[3];
+    uint8_t ui8ControlRegisterValue;
+    uint8_t ui8ConfigRegisterValue;
 
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
                        SYSCTL_XTAL_16MHZ);
@@ -465,6 +561,30 @@ int main(void)
         // while(1) { }
     }
 
+    // The temperature sensor is in sleep mode after power up,
+    // see BMP280 data sheet, page 15 (of 49).
+    // We need to set it in normal mode.
+    // Read the register first in order to only change the power mode
+    // of the control register.
+    // readIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, &ui8ControlRegisterValue);
+    // ui8ControlRegisterValue |= 0x03;
+    // writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, ui8ControlRegisterValue);
+
+    // We also need to set the measurement and filter options (see BMP280 data sheet,
+    // page 16 of 49).
+    // Standard resolution (page 19 of 49):
+    // - osrs_p: x4 --> 011 = 0x03
+    // - osrs_t: x1 --> 001 = 0x01
+    // - IIR filter coeff.: 16 = 0x10
+    //
+    // If we only enable the normal power mode but not the other configuration,
+    // the sensor sends 0x80000
+    ui8ControlRegisterValue = (0x01 << 5) | (0x03 << 2) | 0x03;
+    ui8ConfigRegisterValue = 0x10 << 2;
+    writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, ui8ControlRegisterValue);
+    writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER, ui8ConfigRegisterValue);
+
+
     //
     // Enable USB.
     // The data pins are on PD4 and PD5.
@@ -508,9 +628,18 @@ int main(void)
         turnOffBlueLed();
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_0);
 
-        usb_packet_sent.temp_msb = 0x03;
-        usb_packet_sent.temp_lsb = 0x04;
-        usb_packet_sent.temp_xlsb = 0x05;
+        // Read the power mode
+        readIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, &ui8ControlRegisterValue);
+        usb_packet_sent.power_mode = ui8ControlRegisterValue & 0x03;
+
+
+        // Read the temperature measurement from the sensor
+        readConsecutiveIMURegisters(TEMPERATURE_SENSOR_TEMPERATURE_MSB, 3, ui8TemperatureValues);
+
+        // Fill out the USB-struct
+        usb_packet_sent.temp_msb = ui8TemperatureValues[0];
+        usb_packet_sent.temp_lsb = ui8TemperatureValues[1];
+        usb_packet_sent.temp_xlsb = ui8TemperatureValues[2];
 
         //
         // Have we been asked to update the status display?
