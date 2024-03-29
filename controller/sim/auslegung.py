@@ -22,9 +22,9 @@ import matplotlib.pyplot as plt
 # [ 18.0e-3  1  ] [ b ]   [ 4 ]
 
 
-A = np.array([[-2.0e-3, 1.0],
-              [18.0e-3, 1.0]])
-b = np.array([6.0, 6.05])
+A = np.array([[0, 1.0],
+              [16.0e-3, 1.0]])
+b = np.array([8.0, 8.05])
 
 x = np.linalg.solve(A, b)
 
@@ -37,7 +37,7 @@ print(f'm = {m}\nb = {b}')
 # %% Berechnung der Widerstaende
 
 R1 = 4.7e3
-vref = 6.0
+vref = 12.0
 
 
 R2 = (m/(b/vref)) * R1
@@ -69,9 +69,9 @@ print(f'Pin -: {RG/(RG+RF)*12.0} V')
 # [ 3.5   1 ] [ b ]   [ 9 ]
 
 
-A = np.array([[6.0, 1.0],
-              [6.05, 1.0]])
-b = np.array([3.0, 7.0])
+A = np.array([[8, 1.0],
+              [8.05, 1.0]])
+b = np.array([3.0, 4.0])
 
 x = np.linalg.solve(A, b)
 
