@@ -16,3 +16,9 @@
 # Host
 /host/signals.log
 /host/tiva_usb_connect
+
+# LTspice
+*.raw
+*.log
+*.net
+
