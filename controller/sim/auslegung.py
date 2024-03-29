@@ -24,12 +24,13 @@ import matplotlib.pyplot as plt
 
 A = np.array([[-2.0e-3, 1.0],
               [18.0e-3, 1.0]])
-b = np.array([3.0, 3.5])
+b = np.array([6.0, 6.05])
 
 x = np.linalg.solve(A, b)
 
 m, b = x
 
+print('Stufe 1\n-----------')
 print(f'm = {m}\nb = {b}')
 
 
@@ -53,6 +54,10 @@ print(f'RG = {RG}')
 print(f'RF = {RF}')
 
 
+print(f'Pin +: {R1/(R1+R2)*vref} V')
+print(f'Pin -: {RG/(RG+RF)*12.0} V')
+
+
 # %% STufe 2
 
 # Stufe 2:
@@ -64,21 +69,22 @@ print(f'RF = {RF}')
 # [ 3.5   1 ] [ b ]   [ 9 ]
 
 
-A = np.array([[3.0, 1.0],
-              [3.5, 1.0]])
-b = np.array([3.0, 9.0])
+A = np.array([[6.0, 1.0],
+              [6.05, 1.0]])
+b = np.array([3.0, 7.0])
 
 x = np.linalg.solve(A, b)
 
 m, b = x
 
+print('Stufe 2\n-----------')
 print(f'm = {m}\nb = {b}')
 
 # %% Berechnung der Widerstaende
 
-RG = 18e3
+RG = 4.7e3
 RF = (m-1) * RG
-vref = 6.0
+vref = 12.0
 
 # R2/(R1+R2) = z
 z = abs(b) / vref * RG/RF
