@@ -113,3 +113,14 @@ x = 3.3 / 9.0
 
 y = 4.7e3/(4.7e3+8.2e3)
 
+# %% Aufloesung
+
+N_res = 12
+
+dv = 2.84 - 2.36
+dv_adc = 3.3/(2**N_res)
+
+steps = dv / dv_adc
+
+250 / steps
+
