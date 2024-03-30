@@ -60,7 +60,7 @@ print(f'Pin +: {R1/(R1+R2)*vref} V')
 print(f'Pin -: {RG/(RG+RF)*12.0} V')
 
 
-# %% STufe 2
+# %% Stufe 2
 
 # Stufe 2:
 # V_in ist im Bereich 3 V bis 3.5 V
