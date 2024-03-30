@@ -113,6 +113,7 @@ int main(void)
     while (1)
     {
         float time_sec;
+        float thermocouple_voltage;
 
 
         // Idle (wait) until the sampling interval is over.
@@ -167,6 +168,10 @@ int main(void)
 
         printf("Physical temperature: %f\n", physical_bmp_data.temperature);
         printf("Physical pressure: %f\n", physical_bmp_data.pressure);
+
+        // Convert thermocouple voltage
+        thermocouple_voltage = ((float)usb_packet_from_tiva.amp_thermocouple_voltage / 4096) * 3.3;
+        printf("Thermocouple voltage: %f V\n", thermocouple_voltage);
 
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();

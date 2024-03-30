@@ -683,9 +683,7 @@ int main(void)
         // Your ADC value is now in adcSampleBuf[0]
 
         // Example: Convert ADC value to voltage assuming Vref is 3.3V and ADC resolution is 12 bits
-        float voltage = ((float)adcSampleBuf[0] / 4096) * 3.3;
-
-        // Do something with voltage
+        // float voltage = ((float)adcSampleBuf[0] / 4096) * 3.3;
 
 
         // Put voltage on pin PF4.
@@ -714,6 +712,10 @@ int main(void)
         usb_packet_sent.press_msb = ui8PressureValues[0];
         usb_packet_sent.press_lsb = ui8PressureValues[1];
         usb_packet_sent.press_xlsb = ui8PressureValues[2];
+
+        // Add the ADC0 on PE3 voltage of the amplified thermo couple
+        // to the USB struct
+        usb_packet_sent.amp_thermocouple_voltage = adcSampleBuf[0];
 
         //
         // Have we been asked to update the status display?
