@@ -3,6 +3,8 @@
 # Referenzen:
 # - SLOA030A (TI)
 # - Thermocouple Typ K Tabelle
+# - https://www.mikrocontroller.net/topic/283206
+# - https://www.ti.com/lit/ds/symlink/opa335.pdf Seite 9
 
 # %% Packages
 
