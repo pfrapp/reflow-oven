@@ -108,10 +108,8 @@ print(f'R1_R2_parallel = {R1_R2_parallel} (kleiner als RG={RG})')
 
 # %% Spannunsteiler
 
-# 9 V --> 3.3 V
-x = 3.3 / 9.0
-
-y = 4.7e3/(4.7e3+8.2e3)
+# 12 V --> 3.3 V
+print(f'6.8/(18+6.8)*12 = {6.8/(18+6.8)*12}')
 
 # %% Aufloesung
 
