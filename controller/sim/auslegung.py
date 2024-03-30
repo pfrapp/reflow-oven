@@ -124,3 +124,45 @@ steps = dv / dv_adc
 
 250 / steps
 
+# %% Stufe 3
+
+# Eingangsbereich (0.5 bis 1.2 V) muss erst noch
+# vermessen bzw. bestaetigt werden.
+
+
+A = np.array([[0.5, 1.0],
+              [1.2, 1.0]])
+b = np.array([3.0, 9])
+
+x = np.linalg.solve(A, b)
+
+m, b = x
+
+print('Stufe 1\n-----------')
+print(f'm = {m}\nb = {b}')
+
+# %% Berechnung der Widerstaende
+
+RG = 4.7e3
+RF = (m-1) * RG
+vref = 12.0
+
+# R2/(R1+R2) = z
+z = abs(b) / vref * RG/RF
+
+# R2 = (R1+R2)*z = R1*z + R2*z
+# (1-z)*R2 = R1*z
+# R1 = (1-z)/z * R2
+
+R2 = 1.2e3
+R1 = (1-z)/z * R2
+
+print(f'R1 = {R1}')
+print(f'R2 = {R2}')
+print(f'RG = {RG}')
+print(f'RF = {RF}')
+
+R1_R2_parallel = 1/(1/R1 + 1/R2)
+print(f'R1_R2_parallel = {R1_R2_parallel} (kleiner als RG={RG})')
+
+
