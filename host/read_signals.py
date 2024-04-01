@@ -8,9 +8,11 @@ import matplotlib.pyplot as plt
 
 # %% Read the data
 
-df = pd.read_csv('signals.log')
+path_prefix = '../measurements/2024-03-31/'
+meas_file = 'signals_D2.log'
+df = pd.read_csv(path_prefix + meas_file)
 
-fig = plt.figure('Measured values')
+fig = plt.figure(meas_file)
 plt.clf()
 
 ax = fig.add_subplot(3,1,1)
@@ -41,4 +43,9 @@ ax.set(ylabel='Pressure (Pa)')
 ax.set(title='Pressure')
 
 plt.show()
+
+# %% Mittlere Spannung ausgeben
+
+v_mean = df['Amplified Thermocouple voltage (V)'][1:].mean()
+print(f'Mitlere Spannung Thermocouple Amplifier: {v_mean:7.3f} V')
 
