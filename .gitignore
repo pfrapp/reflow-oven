@@ -22,3 +22,6 @@
 *.log
 *.net
 
+# Gerbers
+/thermo-sensor-analog/fab/*
+/thermo-sensor-digital/fab/*
