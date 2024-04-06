@@ -155,3 +155,17 @@ Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
 
 ## Controller software
 
+## Tiva pin usage and connection
+
+| Pin on Tiva   | Connected with                           | Description        |
+|---------------|-----------------------------------------:|-------------------:|
+| GND           | Thermo amplifier GND                     | Ground             |
+| PE3           | Thermo amplifier between 6.8k and 18k    | ADC input          |
+| GND           | GND of BMP280 evaluation board           | Ground             |
+| +3.3V         | VCC of BMP280 evaluation board           | Supply voltage     |
+| PA6           | SCL of BMP280 evaluation board           | I2C clock          |
+| PA7           | SDA of BMP280 evaluation board           | I2C data           |
+
+See also the following block diagram overview.
+
+![Block diagram overview](blockdiagram_overview.png)
