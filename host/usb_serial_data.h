@@ -42,6 +42,9 @@ typedef struct usb_serial_data_tiva_to_pc_ {
     // 7 bytes, so adding 1 padding byte to align on 32-bit boundary.
     uint8_t padding1;
 
+    // Amplified thermocouple voltage.
+    uint32_t amp_thermocouple_voltage;
+
 
 } usb_serial_data_tiva_to_pc;
 

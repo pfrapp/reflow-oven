@@ -34,9 +34,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.762,
-          "height": 1.524,
-          "width": 1.524
+          "drill": 4.4,
+          "height": 7.0,
+          "width": 7.0
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -405,7 +405,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "controller.kicad_pro",
+    "filename": "thermo-sensor-digital.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -422,24 +422,24 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.4,
+        "track_width": 0.25,
         "via_diameter": 0.8,
         "via_drill": 0.4,
         "wire_width": 6
       },
       {
         "bus_width": 12,
-        "clearance": 0.5,
+        "clearance": 0.2,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "AC",
+        "name": "Power",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 4.0,
+        "track_width": 0.4,
         "via_diameter": 0.8,
         "via_drill": 0.4,
         "wire_width": 6
@@ -452,24 +452,12 @@
     "netclass_assignments": null,
     "netclass_patterns": [
       {
-        "netclass": "AC",
-        "pattern": "AC"
+        "netclass": "Power",
+        "pattern": "+3.3V"
       },
       {
-        "netclass": "Default",
+        "netclass": "Power",
         "pattern": "GND"
-      },
-      {
-        "netclass": "AC",
-        "pattern": "Oven"
-      },
-      {
-        "netclass": "AC",
-        "pattern": "Fuse"
-      },
-      {
-        "netclass": "AC",
-        "pattern": "Earth"
       }
     ]
   },
@@ -520,12 +508,8 @@
   },
   "sheets": [
     [
-      "12246f82-5c9a-456f-a9a1-28ea473855be",
+      "19ef6a1d-1471-49aa-9d9c-b1c1cdf31a28",
       ""
-    ],
-    [
-      "af061c45-1919-4b2b-92a8-7101c6ea2583",
-      "Thermo amplifier"
     ]
   ],
   "text_variables": {}

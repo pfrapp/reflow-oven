@@ -113,6 +113,7 @@ int main(void)
     while (1)
     {
         float time_sec;
+        float thermocouple_voltage;
 
 
         // Idle (wait) until the sampling interval is over.
@@ -123,12 +124,13 @@ int main(void)
         } while (diff_ms < sample_index*sample_time_ms);
 
         time_sec = 0.001f * diff_ms;
+        printf("--------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
 
-        printf("Power mode: 0x%02X\n", usb_packet_from_tiva.power_mode);
-        printf("Temperature: 0x%02X,0x%02X,0x%02X\n",
-            usb_packet_from_tiva.temp_msb,
-            usb_packet_from_tiva.temp_lsb,
-            usb_packet_from_tiva.temp_xlsb);
+        // printf("Power mode: 0x%02X\n", usb_packet_from_tiva.power_mode);
+        // printf("Temperature: 0x%02X,0x%02X,0x%02X\n",
+        //     usb_packet_from_tiva.temp_msb,
+        //     usb_packet_from_tiva.temp_lsb,
+        //     usb_packet_from_tiva.temp_xlsb);
 
         bmp_device.calib_param.dig_t1 = usb_packet_from_tiva.dig_T1;
         bmp_device.calib_param.dig_t2 = usb_packet_from_tiva.dig_T2;
@@ -152,21 +154,25 @@ int main(void)
                                    | (usb_packet_from_tiva.press_lsb << 4)
                                    | (usb_packet_from_tiva.press_msb << (8+4));
 
-        printf("Trimming values:\n");
-        printf("dig_T1 = %u\n", bmp_device.calib_param.dig_t1);
-        printf("dig_T2 = %i\n", bmp_device.calib_param.dig_t2);
-        printf("dig_T3 = %i\n", bmp_device.calib_param.dig_t3);
-        printf("dig_P1 = %u\n", bmp_device.calib_param.dig_p1);
-        printf("dig_P2 = %i\n", bmp_device.calib_param.dig_p2);
-        printf("dig_P3 = %i\n", bmp_device.calib_param.dig_p3);
-        printf("----------\n");
-        printf("Temperature: 0x%08X (%u)\n", raw_bmp_data.temperature, raw_bmp_data.temperature);
-        printf("Pressure: 0x%08X (%u)\n", raw_bmp_data.pressure, raw_bmp_data.pressure);
+        // printf("Trimming values:\n");
+        // printf("dig_T1 = %u\n", bmp_device.calib_param.dig_t1);
+        // printf("dig_T2 = %i\n", bmp_device.calib_param.dig_t2);
+        // printf("dig_T3 = %i\n", bmp_device.calib_param.dig_t3);
+        // printf("dig_P1 = %u\n", bmp_device.calib_param.dig_p1);
+        // printf("dig_P2 = %i\n", bmp_device.calib_param.dig_p2);
+        // printf("dig_P3 = %i\n", bmp_device.calib_param.dig_p3);
+        // printf("----------\n");
+        // printf("Temperature: 0x%08X (%u)\n", raw_bmp_data.temperature, raw_bmp_data.temperature);
+        // printf("Pressure: 0x%08X (%u)\n", raw_bmp_data.pressure, raw_bmp_data.pressure);
 
         bmp2_compensate_data(&raw_bmp_data, &physical_bmp_data, &bmp_device);
 
-        printf("Physical temperature: %f\n", physical_bmp_data.temperature);
-        printf("Physical pressure: %f\n", physical_bmp_data.pressure);
+        printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
+        printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
+
+        // Convert thermocouple voltage
+        thermocouple_voltage = ((float)usb_packet_from_tiva.amp_thermocouple_voltage / 4096) * 3.3;
+        printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
 
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
@@ -209,7 +215,8 @@ int main(void)
         }
 
         // Log to file.
-        logSignalSample(log_fid, sample_index, diff_ms, &usb_packet_to_tiva, &usb_packet_from_tiva, first_log_call);
+        logSignalSample(log_fid, sample_index, diff_ms, physical_bmp_data.temperature,
+        physical_bmp_data.pressure, thermocouple_voltage, first_log_call);
         first_log_call = 0;
 
         // Ready for next sample.

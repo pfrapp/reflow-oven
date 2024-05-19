@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include "inc/hw_memmap.h"
 #include "inc/hw_gpio.h"
+#include "inc/hw_types.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/i2c.h"
+#include "driverlib/adc.h"
 
 // USB from driverlib
 #include "driverlib/usb.h"
@@ -48,6 +50,13 @@ static volatile bool g_bUSBConfigured = false;
 static volatile usb_serial_data_pc_to_tiva usb_packet_recv;
 // The USB data packet that we are sending.
 static volatile usb_serial_data_tiva_to_pc usb_packet_sent;
+
+
+//**********
+// ADC
+//**********
+#define ADC_SEQUENCE_NUM    3 // was 0
+#define ADC_SAMPLE_BUF_SIZE 1 // We're just using one sample
 
 
 //*****************************************************************************
@@ -636,9 +645,47 @@ int main(void)
     ui32RxCount = 0;
     ui32TxCount = 0;
 
+    //
+    // Read in voltage from an ADC pin (0 to 3.3 V).
+    // Note: Ensure that the input voltage actually
+    // is between 0 and 3.3V -- neither lower nor higher.
+    //
+    // Enable ADC0 peripheral
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0)); // Wait for ADC0 to be ready
+
+    // Enable GPIO port E
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE)); // Wait for GPIOE to be ready
+
+    // Configure GPIO pin PE3 as analog input
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3);
+
+    // Configure ADC0 sequencer 0 to capture from channel 0 (corresponding to PE3)
+    ADCSequenceConfigure(ADC0_BASE, ADC_SEQUENCE_NUM, ADC_TRIGGER_PROCESSOR, 0);
+    ADCSequenceStepConfigure(ADC0_BASE, ADC_SEQUENCE_NUM, 0, ADC_CTL_CH0 | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceEnable(ADC0_BASE, ADC_SEQUENCE_NUM);
+
+    uint32_t adcSampleBuf[ADC_SAMPLE_BUF_SIZE]; // Buffer to store ADC samples
+
 
 
     while(true) {
+        // Trigger ADC conversion
+        ADCProcessorTrigger(ADC0_BASE, ADC_SEQUENCE_NUM);
+
+        // Wait for ADC conversion to complete
+        while (!ADCIntStatus(ADC0_BASE, ADC_SEQUENCE_NUM, false));
+
+        // Read ADC values
+        ADCSequenceDataGet(ADC0_BASE, ADC_SEQUENCE_NUM, adcSampleBuf);
+
+        // Your ADC value is now in adcSampleBuf[0]
+
+        // Example: Convert ADC value to voltage assuming Vref is 3.3V and ADC resolution is 12 bits
+        // float voltage = ((float)adcSampleBuf[0] / 4096) * 3.3;
+
+
         // Put voltage on pin PF4.
         // Tested via measurement: works.
         SysCtlDelay(SysCtlClockGet() / 2);
@@ -665,6 +712,10 @@ int main(void)
         usb_packet_sent.press_msb = ui8PressureValues[0];
         usb_packet_sent.press_lsb = ui8PressureValues[1];
         usb_packet_sent.press_xlsb = ui8PressureValues[2];
+
+        // Add the ADC0 on PE3 voltage of the amplified thermo couple
+        // to the USB struct
+        usb_packet_sent.amp_thermocouple_voltage = adcSampleBuf[0];
 
         //
         // Have we been asked to update the status display?

@@ -6,8 +6,9 @@
 
 
 int logSignalSample(FILE *log_fid, int index, int time_ms,
-                    usb_serial_data_pc_to_tiva *usb_packet_to_tiva,
-                    usb_serial_data_tiva_to_pc *usb_packet_from_tiva,
+                    double temperature,
+                    double pressure,
+                    double amp_thermocouple_voltage,
                     int bWriteHeader);
 
 #endif // #ifndef LOGGING_H

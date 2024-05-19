@@ -1,28 +1,25 @@
 #include "logging.h"
 
 int logSignalSample(FILE *log_fid, int index, int time_ms,
-                    usb_serial_data_pc_to_tiva *usb_packet_to_tiva,
-                    usb_serial_data_tiva_to_pc *usb_packet_from_tiva,
+                    double temperature,
+                    double pressure,
+                    double amp_thermocouple_voltage,
                     int bWriteHeader) {
 
-    if (!log_fid || !usb_packet_to_tiva || !usb_packet_from_tiva) {
+    if (!log_fid) {
         return -1;
     }
 
     if (bWriteHeader) {
-        fprintf(log_fid, "Index,Time (ms),Motor,temp_msb,temp_lsb,temp_xlsb,press_msb,press_lsb,press_xlsb\n");
+        fprintf(log_fid, "Index,Time (ms),Temperature (C),Pressure (Pa),Amplified Thermocouple voltage (V)\n");
     }
 
     //
-    fprintf(log_fid, "%05i,%09i,0x%04x,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X,0x%02X\n",
+    fprintf(log_fid, "%05i,%09i,%06.2f,%08.2f,%07.4f\n",
             index, time_ms,
-            usb_packet_to_tiva->motor,
-            usb_packet_from_tiva->temp_msb,
-            usb_packet_from_tiva->temp_lsb,
-            usb_packet_from_tiva->temp_xlsb,
-            usb_packet_from_tiva->press_msb,
-            usb_packet_from_tiva->press_lsb,
-            usb_packet_from_tiva->press_xlsb);
+            temperature,
+            pressure,
+            amp_thermocouple_voltage);
 
     return 0;
 }
