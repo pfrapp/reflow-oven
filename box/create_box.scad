@@ -13,7 +13,7 @@
 // - 20 mm mehr Platz hin zum Stromanschluss (/)
 // - Loecher muessen deutlich hoeher sein (/)
 // - Wand muss 10 mm hoeher sein (/)
-// - Bohrungen fuer Deckel vorsehen
+// - Bohrungen fuer Deckel vorsehen (/)
 // - Befestigung fuer uC vorsehen
 // - Platz fuer Temperaturmessverstaerker vorsehen
 // - Anschluss fuer Temperatursensor vorsehen
@@ -73,19 +73,44 @@ module kabelfuehrung() {
     }
 }
 
-difference() {
-    union() {
-        box();
-        translate([-5,0,0])
-            halter(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
-        translate([-90,80,0])
-            halter(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
+module quarter_cylinder(r, h) {
+    difference() {
+        cylinder(h=h, r=r, $fn=g_fn);
+        translate([-r,0,0])
+            cube([2*r, 2*r, 4*h], center=true);
+        translate([0,-r,0])
+            cube([2*r, 2*r, 4*h], center=true);
     }
-    translate([-5,0,0])
-        halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
-    translate([-90,80,0])
-        halter_loecher(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
-    kabelfuehrung();
 }
+
+module entity() {
+    difference() {
+        union() {
+            box();
+            translate([-5,0,0])
+                halter(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
+            translate([-90,80,0])
+                halter(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
+            translate([80,40,3])
+                rotate([0,0,180])
+                    quarter_cylinder(r=12, h=32);
+            translate([80,-40,3])
+                rotate([0,0,90])
+                    quarter_cylinder(r=12, h=32);
+        }
+        translate([-5,0,0])
+            halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
+        translate([-90,80,0])
+            halter_loecher(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
+        translate([80,0,23])
+            halter_loecher([-5], [-35, 35]);
+        kabelfuehrung();
+    }
+}
+
+
+//quarter_cylinder(r=10, h=20);
+
+entity();
 
 
