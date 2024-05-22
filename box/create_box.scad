@@ -11,8 +11,8 @@
 
 // Notwendige Aenderungen:
 // - 20 mm mehr Platz hin zum Stromanschluss (/)
-// - Loecher muessen deutlich hoeher sein
-// - Wand muss 10 mm hoeher sein
+// - Loecher muessen deutlich hoeher sein (/)
+// - Wand muss 10 mm hoeher sein (/)
 // - Bohrungen fuer Deckel vorsehen
 // - Befestigung fuer uC vorsehen
 // - Platz fuer Temperaturmessverstaerker vorsehen
@@ -33,11 +33,11 @@ g_bohrmuster_thermo_board_y = [-21, 21];
 module box() {
     translate([-60,-40,0])
         difference() {
-            cube([140,80,25]);
+            cube([140,80,35]);
             translate([0,3,3])
-                cube([135,74,22]);
+                cube([135,74,32]);
             translate([0,0,3])
-                cube([60,80,22]);
+                cube([60,80,32]);
         }
 }
 
@@ -66,7 +66,7 @@ module halter_loecher(pattern_x, pattern_y) {
 
 module kabelfuehrung() {
     for (y = [-3,15]) {
-        translate([70,y,15])
+        translate([70,y,25])
             rotate([0,90,0]) {
                 cylinder(d=d_stromkabel, h=20, $fn=g_fn);
             }
