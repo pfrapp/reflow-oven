@@ -1,13 +1,18 @@
 // Box for the reflow controller
 //
-// Board dim: 90 x 60
+// Aktor/Ansteuerung Board Dimension: 90 x 60
 // Bohrmuster: 82 x 52
 // Rand: 10 links (hin zum uC), 20 rechts (hin zum Ofen und Netzspannung)
+
+// Sensor/Digital Thermocouple Board Dimesion: 70 x 50
+// Bohrmuster: 62 x 42
+// Hinweis: Die Bohrung oben rechts ist um ca. 0.3 mm in y-Richtung verschoben.
+
 
 // Notwendige Aenderungen:
 // - 20 mm mehr Platz hin zum Stromanschluss
 // - Loecher muessen deutlich hoeher sein
-// - Wand  muss 10 mm hoeher sein
+// - Wand muss 10 mm hoeher sein
 // - Bohrungen fuer Deckel vorsehen
 // - Befestigung fuer uC vorsehen
 // - Platz fuer Temperaturmessverstaerker vorsehen
