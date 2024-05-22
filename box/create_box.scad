@@ -19,6 +19,9 @@ g_fn = 90;
 // Nominell 8 mm (gemessen), plus 0.2 mm Toleranz wg. 3D Drucker
 d_stromkabel = 8.0 + 0.2;
 
+g_bohrmuster_relay_board_x = [-41, 41];
+g_bohrmuster_relay_board_y = [-26, 26];
+
 module box() {
     translate([-60,-40,0])
         difference() {
@@ -31,8 +34,8 @@ module box() {
 }
 
 module halter() {
-    for (x = [-41,41]) {
-        for (y = [-26,26]) {
+    for (x = g_bohrmuster_relay_board_x) {
+        for (y = g_bohrmuster_relay_board_y) {
             translate([x,y,0]) {
                 cylinder(d=10, h=12, $fn=g_fn);
             }
@@ -42,8 +45,8 @@ module halter() {
 
 
 module halter_loecher() {
-    for (x = [-41,41]) {
-        for (y = [-26,26]) {
+    for (x = g_bohrmuster_relay_board_x) {
+        for (y = g_bohrmuster_relay_board_y) {
             translate([x,y,0]) {
                 translate([0,0,6.2])
                     cylinder(d=4.0, h=5.8, $fn=g_fn);
@@ -67,11 +70,6 @@ difference() {
         box();
         translate([-5,0,0])
             halter();
-//        for (y=[-3,15]) {
-//            translate([45,-5+y,0])
-//                cube([15,10,15]);
-//        }
-
     }
     translate([-5,0,0])
         halter_loecher();
