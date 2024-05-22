@@ -27,6 +27,9 @@ d_stromkabel = 8.0 + 0.2;
 g_bohrmuster_relay_board_x = [-41, 41];
 g_bohrmuster_relay_board_y = [-26, 26];
 
+g_bohrmuster_thermo_board_x = [-31, 31];
+g_bohrmuster_thermo_board_y = [-21, 21];
+
 module box() {
     translate([-60,-40,0])
         difference() {
@@ -38,9 +41,9 @@ module box() {
         }
 }
 
-module halter() {
-    for (x = g_bohrmuster_relay_board_x) {
-        for (y = g_bohrmuster_relay_board_y) {
+module halter(pattern_x, pattern_y) {
+    for (x = pattern_x) {
+        for (y = pattern_y) {
             translate([x,y,0]) {
                 cylinder(d=10, h=12, $fn=g_fn);
             }
@@ -49,9 +52,9 @@ module halter() {
 }
 
 
-module halter_loecher() {
-    for (x = g_bohrmuster_relay_board_x) {
-        for (y = g_bohrmuster_relay_board_y) {
+module halter_loecher(pattern_x, pattern_y) {
+    for (x = pattern_x) {
+        for (y = pattern_y) {
             translate([x,y,0]) {
                 translate([0,0,6.2])
                     cylinder(d=4.0, h=5.8, $fn=g_fn);
@@ -74,10 +77,14 @@ difference() {
     union() {
         box();
         translate([-5,0,0])
-            halter();
+            halter(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
+        translate([-90,80,0])
+            halter(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
     }
     translate([-5,0,0])
-        halter_loecher();
+        halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
+    translate([-90,80,0])
+        halter_loecher(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
     kabelfuehrung();
 }
 
