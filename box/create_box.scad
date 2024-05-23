@@ -33,11 +33,13 @@ g_bohrmuster_thermo_board_y = [-21, 21];
 module box() {
     translate([-60,-40,0])
         difference() {
-            cube([140,80,35]);
+            cube([140,160,35]);
             translate([0,3,3])
                 cube([135,74,32]);
+            translate([0,80,3])
+                cube([135,80,32]);
             translate([0,0,3])
-                cube([60,80,32]);
+                cube([60,160,32]);
         }
 }
 
@@ -83,13 +85,53 @@ module quarter_cylinder(r, h) {
     }
 }
 
+// Bohrungen fuer die Laborstecker.
+// Durchmesser: 8 mm (daher 8.2 mm wg. Toleranz).
+module bohrungen_laborstecker() {
+    g_laenge = 90.0;
+    g_wanddicke = 5;
+    g_hoehe = 35;
+    
+    
+    d_bohrung_laborstecker = 8.2;
+    translate([0,g_wanddicke,g_hoehe/2])
+        rotate([90,0,0])
+            linear_extrude(g_wanddicke, center=false) {
+                translate([g_laenge/4,0,0])
+                    circle(d=d_bohrung_laborstecker, $fn=g_fn);
+                translate([g_laenge/2,0,0])
+                    circle(d=d_bohrung_laborstecker, $fn=g_fn);
+            }
+    // Beschriftung
+    font_size = 4.5;
+    text_depth = 2;
+    translate([g_laenge/4+0*d_bohrung_laborstecker,0,3*g_hoehe/4])
+        rotate([90,0,0])
+            translate([0,0,-text_depth])
+                linear_extrude(text_depth, center=false)
+                    text("T(-)",
+                        font = "Arial Black",
+                        size = font_size,
+                        valign = "bottom",
+                        halign = "center");
+    translate([g_laenge/2+0*d_bohrung_laborstecker,0,3*g_hoehe/4])
+        rotate([90,0,0])
+            translate([0,0,-text_depth])
+                linear_extrude(text_depth, center=false)
+                    text("T(+)",
+                        font = "Arial Black",
+                        size = font_size,
+                        valign = "bottom",
+                        halign = "center");
+}
+
 module entity() {
     difference() {
         union() {
             box();
             translate([-5,0,0])
                 halter(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
-            translate([-90,80,0])
+            translate([0,80,0])
                 halter(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
             translate([80,40,3])
                 rotate([0,0,180])
@@ -100,11 +142,14 @@ module entity() {
         }
         translate([-5,0,0])
             halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
-        translate([-90,80,0])
+        translate([0,80,0])
             halter_loecher(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
         translate([80,0,23])
             halter_loecher([-5], [-35, 35]);
         kabelfuehrung();
+        translate([80,40,0])
+            rotate([0,0,90])
+                bohrungen_laborstecker();
     }
 }
 
@@ -112,5 +157,8 @@ module entity() {
 //quarter_cylinder(r=10, h=20);
 
 entity();
+
+
+
 
 
