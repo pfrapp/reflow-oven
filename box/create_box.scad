@@ -14,9 +14,9 @@
 // - Loecher muessen deutlich hoeher sein (/)
 // - Wand muss 10 mm hoeher sein (/)
 // - Bohrungen fuer Deckel vorsehen (/)
-// - Befestigung fuer uC vorsehen
-// - Platz fuer Temperaturmessverstaerker vorsehen
-// - Anschluss fuer Temperatursensor vorsehen
+// - Befestigung fuer uC vorsehen (/)
+// - Platz fuer Temperaturmessverstaerker vorsehen (/)
+// - Anschluss fuer Temperatursensor vorsehen (/)
 
 
 g_fn = 90;
@@ -33,13 +33,17 @@ g_bohrmuster_thermo_board_y = [-21, 21];
 module box() {
     translate([-60,-40,0])
         difference() {
-            cube([140,160,35]);
+            cube([140,195,35]);
             translate([0,3,3])
                 cube([135,74,32]);
             translate([0,80,3])
-                cube([135,80,32]);
+                cube([135,115,32]);
             translate([0,0,3])
                 cube([60,160,32]);
+            translate([0,150,3])
+                cube([140,45,35]);
+            translate([42,100,0])
+                cube([35,80,3]);
         }
 }
 
@@ -53,8 +57,32 @@ module halter(pattern_x, pattern_y) {
     }
 }
 
+// todo: durchmesser anpassen!
+module halter_hutschiene(pattern_x, pattern_y) {
+    for (x = pattern_x) {
+        for (y = pattern_y) {
+            translate([x,y,0]) {
+                cylinder(d=10, h=12, $fn=g_fn);
+            }
+        }
+    }
+}
+
 
 module halter_loecher(pattern_x, pattern_y) {
+    for (x = pattern_x) {
+        for (y = pattern_y) {
+            translate([x,y,0]) {
+                translate([0,0,6.2])
+                    cylinder(d=4.0, h=5.8, $fn=g_fn);
+                cylinder(d=3.4, h=12, $fn=g_fn);
+            }
+        }
+    }
+}
+
+// todo: durchmesser anpassen!
+module halter_loecher_hutschiene(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
@@ -133,6 +161,9 @@ module entity() {
                 halter(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
             translate([0,80,0])
                 halter(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
+            // Hutschiene
+            translate([-30,145,0])
+                halter_hutschiene([0, 75], [0]);
             translate([80,40,3])
                 rotate([0,0,180])
                     quarter_cylinder(r=12, h=32);
@@ -144,8 +175,12 @@ module entity() {
             halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
         translate([0,80,0])
             halter_loecher(g_bohrmuster_thermo_board_x, g_bohrmuster_thermo_board_y);
+        // Loecher zur Befestigung des Deckels
         translate([80,0,23])
             halter_loecher([-5], [-35, 35]);
+        // Loecher zur Befestigung der Hutschiene
+        translate([-30,145,0])
+            halter_loecher_hutschiene([0, 75], [0]);
         kabelfuehrung();
         translate([80,40,0])
             rotate([0,0,90])
