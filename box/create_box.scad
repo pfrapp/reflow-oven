@@ -33,17 +33,17 @@ g_bohrmuster_thermo_board_y = [-21, 21];
 module box() {
     translate([-60,-40,0])
         difference() {
-            cube([140,195,35]);
-            translate([0,3,3])
-                cube([135,74,32]);
-            translate([0,80,3])
-                cube([135,115,32]);
-            translate([0,0,3])
+            cube([140,195,32]);
+            translate([0,2,2])
+                cube([136,76,32]);
+            translate([0,80,2])
+                cube([136,115,32]);
+            translate([0,0,2])
                 cube([60,160,32]);
-            translate([0,150,3])
+            translate([0,150,2])
                 cube([140,45,35]);
             translate([42,100,0])
-                cube([35,80,3]);
+                cube([35,80,2]);
         }
 }
 
@@ -51,7 +51,7 @@ module halter(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
-                cylinder(d=10, h=12, $fn=g_fn);
+                cylinder(d=10, h=10, $fn=g_fn);
             }
         }
     }
@@ -62,7 +62,7 @@ module halter_hutschiene(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
-                cylinder(d=10, h=12, $fn=g_fn);
+                cylinder(d=10, h=10, $fn=g_fn);
             }
         }
     }
@@ -73,9 +73,9 @@ module halter_loecher(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
-                translate([0,0,6.2])
+                translate([0,0,4.2])
                     cylinder(d=4.0, h=5.8, $fn=g_fn);
-                cylinder(d=3.4, h=12, $fn=g_fn);
+                cylinder(d=3.4, h=10, $fn=g_fn);
             }
         }
     }
@@ -86,9 +86,9 @@ module halter_loecher_hutschiene(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
-                translate([0,0,6.2])
+                translate([0,0,4.2])
                     cylinder(d=4.0, h=5.8, $fn=g_fn);
-                cylinder(d=3.4, h=12, $fn=g_fn);
+                cylinder(d=3.4, h=10, $fn=g_fn);
             }
         }
     }
@@ -96,7 +96,7 @@ module halter_loecher_hutschiene(pattern_x, pattern_y) {
 
 module kabelfuehrung() {
     for (y = [-3,15]) {
-        translate([70,y,25])
+        translate([70,y,23])
             rotate([0,90,0]) {
                 cylinder(d=d_stromkabel, h=20, $fn=g_fn);
             }
@@ -118,7 +118,7 @@ module quarter_cylinder(r, h) {
 module bohrungen_laborstecker() {
     g_laenge = 90.0;
     g_wanddicke = 5;
-    g_hoehe = 35;
+    g_hoehe = 30;
     
     
     d_bohrung_laborstecker = 8.2;
@@ -164,12 +164,12 @@ module entity() {
             // Hutschiene
             translate([-30,145,0])
                 halter_hutschiene([0, 75], [0]);
-            translate([80,40,3])
+            translate([80,40,2])
                 rotate([0,0,180])
-                    quarter_cylinder(r=12, h=32);
-            translate([80,-40,3])
+                    quarter_cylinder(r=12, h=30);
+            translate([80,-40,2])
                 rotate([0,0,90])
-                    quarter_cylinder(r=12, h=32);
+                    quarter_cylinder(r=12, h=30);
         }
         translate([-5,0,0])
             halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
