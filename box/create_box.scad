@@ -33,9 +33,13 @@ g_bohrmuster_thermo_board_y = [-21, 21];
 module box() {
     translate([-60,-40,0])
         difference() {
-            cube([140,195,32]);
-            translate([0,2,2])
-                cube([136,76,32]);
+            union() {
+                cube([140,80,32]);
+                translate([136,80,0])
+                    cube([4,58,32]);
+            }
+            translate([0,2,1.5])
+                cube([136,76,32.5]);
             translate([0,80,2])
                 cube([136,115,32]);
             translate([0,0,2])
@@ -153,6 +157,20 @@ module bohrungen_laborstecker() {
                         halign = "center");
 }
 
+module verbindung_halter() {
+    // Grundform
+    grundform_points = [[-52, -38], [-52, 40], [-38, 60], [-38, 150],
+                        [55, 150], [38, 110], [38, 60], [42, 40], [42, -38],
+                        [30, -38], [30, 40], [25, 60], [25, 110], [35, 140],
+                        [-25, 140], [-25, 55], [-40, 35], [-40, -38]
+                       ];
+    linear_extrude(3.0)
+        minkowski() {
+            polygon(grundform_points);
+            circle(r=2, $fn = g_fn);
+        }
+}
+
 module entity() {
     difference() {
         union() {
@@ -170,6 +188,7 @@ module entity() {
             translate([80,-40,2])
                 rotate([0,0,90])
                     quarter_cylinder(r=12, h=30);
+            verbindung_halter();
         }
         translate([-5,0,0])
             halter_loecher(g_bohrmuster_relay_board_x, g_bohrmuster_relay_board_y);
@@ -189,9 +208,8 @@ module entity() {
 }
 
 
-//quarter_cylinder(r=10, h=20);
-
 entity();
+
 
 
 
