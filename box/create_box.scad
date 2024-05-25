@@ -61,12 +61,11 @@ module halter(pattern_x, pattern_y) {
     }
 }
 
-// todo: durchmesser anpassen!
 module halter_hutschiene(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
-                cylinder(d=10, h=10, $fn=g_fn);
+                cylinder(d=12, h=16, $fn=g_fn);
             }
         }
     }
@@ -85,14 +84,13 @@ module halter_loecher(pattern_x, pattern_y) {
     }
 }
 
-// todo: durchmesser anpassen!
 module halter_loecher_hutschiene(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
             translate([x,y,0]) {
-                translate([0,0,4.2])
-                    cylinder(d=4.0, h=5.8, $fn=g_fn);
-                cylinder(d=3.4, h=10, $fn=g_fn);
+                translate([0,0,7.8])
+                    cylinder(d=5.6, h=8.2, $fn=g_fn);
+                cylinder(d=4.6, h=16, $fn=g_fn);
             }
         }
     }
