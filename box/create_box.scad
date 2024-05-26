@@ -207,6 +207,8 @@ module entity() {
 
 
 entity();
+// translate([-16,0,32])
+//     lid();
 
 
 
