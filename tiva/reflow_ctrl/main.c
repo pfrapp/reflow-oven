@@ -26,6 +26,9 @@
 // If you fail to add USB0DeviceIntHandler to the ISR, you end up in the
 // default interrupt.
 
+//
+// Definitions for the Bosch BMP280.
+//
 #define TEMPERATURE_SENSOR_PERIPHERAL_I2C_ADDRESS 0x76
 #define TEMPERATURE_SENSOR_REGISTER_WHO_AM_I 0xD0
 #define TEMPERATURE_SENSOR_TEMPERATURE_MSB 0xFA
@@ -561,8 +564,8 @@ int main(void)
         turnOnRedLed();
         turnOffGreenLed();
         turnOffBlueLed();
-        // If we get here, there is a problem with the IMU or the
-        // IMU communication.
+        // If we get here, there is a problem with the BMP280 or the
+        // BMP280 communication.
         // Signal this fatal error with a red LED and halt the program.
         while(1) { }
     } else {
