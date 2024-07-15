@@ -168,6 +168,7 @@ Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
 | PB6           | Digital Thermo amplifier MISO                   | SPI data           |
 | PB5           | Digital Thermo amplifier CS                     | SPI CS             |
 | PB4           | Digital Thermo amplifier Clock                  | SPI clock          |
+| PF4           | Controller board pin 2                          | Relay control      |
 
 See also the following block diagram overview.
 
