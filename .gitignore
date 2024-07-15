@@ -3,6 +3,7 @@
 /controller/*.zip
 
 /box/box.stl
+/box/lid.stl
 /box/fab
 
 # Tiva
