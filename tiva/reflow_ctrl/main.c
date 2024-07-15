@@ -3,11 +3,13 @@
 #include "inc/hw_memmap.h"
 #include "inc/hw_gpio.h"
 #include "inc/hw_types.h"
+#include "inc/hw_ssi.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/i2c.h"
 #include "driverlib/adc.h"
+#include "driverlib/ssi.h"
 
 // USB from driverlib
 #include "driverlib/usb.h"
@@ -518,6 +520,9 @@ int main(void)
     uint8_t ui8ConfigRegisterValue;
     uint8_t ui8TrimmingValues[24];
 
+    // We use 16 bit out of those 32 bit.
+    uint32_t ui32DigitalThermocoupleData;
+
     SysCtlClockSet(SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |
                        SYSCTL_XTAL_16MHZ);
 
@@ -556,24 +561,26 @@ int main(void)
     //
     // Read out the Who-Am-I register
     //
-    uint8_t who_am_i_register_value = 0;
-    readIMURegister(TEMPERATURE_SENSOR_REGISTER_WHO_AM_I, &who_am_i_register_value);
-    SysCtlDelay(SysCtlClockGet() / 3 / 4000);
+    if (0) {
+        uint8_t who_am_i_register_value = 0;
+        readIMURegister(TEMPERATURE_SENSOR_REGISTER_WHO_AM_I, &who_am_i_register_value);
+        SysCtlDelay(SysCtlClockGet() / 3 / 4000);
 
-    if (who_am_i_register_value != 0x58) {
-        turnOnRedLed();
-        turnOffGreenLed();
-        turnOffBlueLed();
-        // If we get here, there is a problem with the BMP280 or the
-        // BMP280 communication.
-        // Signal this fatal error with a red LED and halt the program.
-        while(1) { }
-    } else {
-        // All good.
-        turnOffRedLed();
-        turnOnGreenLed();
-        turnOffBlueLed();
-        // while(1) { }
+        if (who_am_i_register_value != 0x58) {
+            turnOnRedLed();
+            turnOffGreenLed();
+            turnOffBlueLed();
+            // If we get here, there is a problem with the BMP280 or the
+            // BMP280 communication.
+            // Signal this fatal error with a red LED and halt the program.
+            while(1) { }
+        } else {
+            // All good.
+            turnOffRedLed();
+            turnOnGreenLed();
+            turnOffBlueLed();
+            // while(1) { }
+        }
     }
 
     // The temperature sensor is in sleep mode after power up,
@@ -596,25 +603,61 @@ int main(void)
     // the sensor sends 0x80000
     ui8ControlRegisterValue = (0x01 << 5) | (0x03 << 2) | 0x03;
     ui8ConfigRegisterValue = 0x10 << 2;
-    writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, ui8ControlRegisterValue);
-    writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER, ui8ConfigRegisterValue);
+    if (0) {
+        writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, ui8ControlRegisterValue);
+        writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER, ui8ConfigRegisterValue);
+    }
 
     // Read the trimming values (calibration values).
     // The LSB comes first.
-    readConsecutiveIMURegisters(0x88, 24, ui8TrimmingValues);
-    usb_packet_sent.dig_T1 = (uint16_t) ((ui8TrimmingValues[0] << 0) + (ui8TrimmingValues[1] << 8));
-    usb_packet_sent.dig_T2 = (int16_t) ((ui8TrimmingValues[2] << 0) + (ui8TrimmingValues[3] << 8));
-    usb_packet_sent.dig_T3 = (int16_t) ((ui8TrimmingValues[4] << 0) + (ui8TrimmingValues[5] << 8));
+    if (0) {
+        readConsecutiveIMURegisters(0x88, 24, ui8TrimmingValues);
+        usb_packet_sent.dig_T1 = (uint16_t) ((ui8TrimmingValues[0] << 0) + (ui8TrimmingValues[1] << 8));
+        usb_packet_sent.dig_T2 = (int16_t) ((ui8TrimmingValues[2] << 0) + (ui8TrimmingValues[3] << 8));
+        usb_packet_sent.dig_T3 = (int16_t) ((ui8TrimmingValues[4] << 0) + (ui8TrimmingValues[5] << 8));
 
-    usb_packet_sent.dig_P1 = (uint16_t) ((ui8TrimmingValues[6] << 0) + (ui8TrimmingValues[7] << 8));
-    usb_packet_sent.dig_P2 = (int16_t) ((ui8TrimmingValues[8] << 0) + (ui8TrimmingValues[9] << 8));
-    usb_packet_sent.dig_P3 = (int16_t) ((ui8TrimmingValues[10] << 0) + (ui8TrimmingValues[11] << 8));
-    usb_packet_sent.dig_P4 = (int16_t) ((ui8TrimmingValues[12] << 0) + (ui8TrimmingValues[13] << 8));
-    usb_packet_sent.dig_P5 = (int16_t) ((ui8TrimmingValues[14] << 0) + (ui8TrimmingValues[15] << 8));
-    usb_packet_sent.dig_P6 = (int16_t) ((ui8TrimmingValues[16] << 0) + (ui8TrimmingValues[17] << 8));
-    usb_packet_sent.dig_P7 = (int16_t) ((ui8TrimmingValues[18] << 0) + (ui8TrimmingValues[19] << 8));
-    usb_packet_sent.dig_P8 = (int16_t) ((ui8TrimmingValues[20] << 0) + (ui8TrimmingValues[21] << 8));
-    usb_packet_sent.dig_P9 = (int16_t) ((ui8TrimmingValues[22] << 0) + (ui8TrimmingValues[23] << 8));
+        usb_packet_sent.dig_P1 = (uint16_t) ((ui8TrimmingValues[6] << 0) + (ui8TrimmingValues[7] << 8));
+        usb_packet_sent.dig_P2 = (int16_t) ((ui8TrimmingValues[8] << 0) + (ui8TrimmingValues[9] << 8));
+        usb_packet_sent.dig_P3 = (int16_t) ((ui8TrimmingValues[10] << 0) + (ui8TrimmingValues[11] << 8));
+        usb_packet_sent.dig_P4 = (int16_t) ((ui8TrimmingValues[12] << 0) + (ui8TrimmingValues[13] << 8));
+        usb_packet_sent.dig_P5 = (int16_t) ((ui8TrimmingValues[14] << 0) + (ui8TrimmingValues[15] << 8));
+        usb_packet_sent.dig_P6 = (int16_t) ((ui8TrimmingValues[16] << 0) + (ui8TrimmingValues[17] << 8));
+        usb_packet_sent.dig_P7 = (int16_t) ((ui8TrimmingValues[18] << 0) + (ui8TrimmingValues[19] << 8));
+        usb_packet_sent.dig_P8 = (int16_t) ((ui8TrimmingValues[20] << 0) + (ui8TrimmingValues[21] << 8));
+        usb_packet_sent.dig_P9 = (int16_t) ((ui8TrimmingValues[22] << 0) + (ui8TrimmingValues[23] << 8));
+    }
+
+    //
+    // Enable SPI in order to read out the digital thermocouple MAX6675.
+    //
+
+    // Enable the peripherals for GPIOB
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB)) {}
+
+    // Configure the pin muxing for SSI2 functions on port B pins
+    GPIOPinConfigure(GPIO_PB4_SSI2CLK);
+    //GPIOPinConfigure(GPIO_PB5_SSI2FSS);
+    GPIOPinConfigure(GPIO_PB6_SSI2RX);
+    GPIOPinConfigure(GPIO_PB7_SSI2TX);
+
+    // Configure PB5 as a GPIO output for manual CS control
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_5);
+
+    // Configure the pins for SSI functionality
+    GPIOPinTypeSSI(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7);
+
+    // Enable the SSI2 peripheral
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI2);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_SSI2)) {}
+
+    // Configure the SSI2 settings
+    SSIConfigSetExpClk(SSI2_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
+                    SSI_MODE_MASTER, 1000000, 16); // 1 MHz, 16-bit data
+
+    // Enable the SSI2 module
+    SSIEnable(SSI2_BASE);
+
 
 
     //
@@ -698,6 +741,12 @@ int main(void)
         turnOffBlueLed();
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_0);
 
+        //
+        // -------------------------------------------------------------------------------------------
+        // Read the BMP280
+        //
+        if (0) {
+
         // Read the power mode
         readIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, &ui8ControlRegisterValue);
         usb_packet_sent.power_mode = ui8ControlRegisterValue & 0x03;
@@ -707,6 +756,48 @@ int main(void)
         readConsecutiveIMURegisters(TEMPERATURE_SENSOR_TEMPERATURE_MSB, 3, ui8TemperatureValues);
         // Read the pressure measurement from the sensor
         readConsecutiveIMURegisters(TEMPERATURE_SENSOR_PRESSURE_MSB, 3, ui8PressureValues);
+                    
+        }
+        //
+        // -------------------------------------------------------------------------------------------
+        //
+
+        // Read the digital thermocouple MAX6675 (blocking).
+        //SSIDataGet(SSI2_BASE, &ui32DigitalThermocoupleData);
+        ui32DigitalThermocoupleData = 0;
+        // Assert CS (active low)
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
+
+        // Wait for a short delay (e.g., 1ms) for the MAX6675 to prepare data
+        SysCtlDelay(SysCtlClockGet() / (1000 * 3));
+
+        // Sending dummy data to generate clock signals
+        SSIDataPut(SSI2_BASE, 0x0000);
+
+        // Waiting for transmission to complete
+        while (SSIBusy(SSI2_BASE)) {}
+
+        SSIDataGet(SSI2_BASE, &ui32DigitalThermocoupleData);
+
+//        while (SSIBusy(SSI2_BASE)) {}
+
+        // De-assert CS (inactive high)
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
+
+        // Hinweis: Das Datenblatt des MAX6675 sagt:
+        // "In order to allow the operation of the
+        // open thermocouple detector, T- must be grounded."
+        // Das heisst T- muss auf Masse gelegt werden, damit der Chip
+        // ueberhaupt in der Lage ist zu erkennen ob die connection offen ist.
+        // Vgl. auch
+        // https://www.mikrocontroller.net/topic/221529
+        // Das erklaert warum bei mir am Anfang Bit D2 noch auf 0 war, d.h.
+        // die Offenheit (bzw. Brucherkennung) nicht erkannt hat.
+        // Auf meiner Platine ist T- ja nicht auf GND.
+        // Es tat dann aber, als ich T- mit GND verbunden habe.
+
+        // Process the received data
+        // For example, you can store it in a buffer or print it
 
         // Fill out the USB-struct
         usb_packet_sent.temp_msb = ui8TemperatureValues[0];
