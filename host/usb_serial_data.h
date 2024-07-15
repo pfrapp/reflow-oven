@@ -45,6 +45,9 @@ typedef struct usb_serial_data_tiva_to_pc_ {
     // Amplified thermocouple voltage.
     uint32_t amp_thermocouple_voltage;
 
+    // Value read from the digital thermocouple (only lower 16 bits are valid).
+    uint32_t digital_amp_thermocouple;
+
 
 } usb_serial_data_tiva_to_pc;
 

@@ -811,6 +811,8 @@ int main(void)
         // to the USB struct
         usb_packet_sent.amp_thermocouple_voltage = adcSampleBuf[0];
 
+        usb_packet_sent.digital_amp_thermocouple = ui32DigitalThermocoupleData;
+
         //
         // Have we been asked to update the status display?
         //

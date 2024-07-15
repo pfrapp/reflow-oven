@@ -114,6 +114,7 @@ int main(void)
     {
         float time_sec;
         float thermocouple_voltage;
+        uint16_t digital_thermocouple;
 
 
         // Idle (wait) until the sampling interval is over.
@@ -173,6 +174,15 @@ int main(void)
         // Convert thermocouple voltage
         thermocouple_voltage = ((float)usb_packet_from_tiva.amp_thermocouple_voltage / 4096) * 3.3;
         printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
+
+        // Digital thermocouple value
+        digital_thermocouple = usb_packet_from_tiva.digital_amp_thermocouple & 0x0000FFFF;
+        if (digital_thermocouple & 0x0004) {
+            printf("Digital thermocouple is open\n");
+        } else {
+            printf("Digital thermocouple is closed\n");
+        }
+        printf("Digital thermocouple:  %f deg C\n", (digital_thermocouple >> 3) * 0.25f);
 
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
