@@ -102,6 +102,10 @@ We use an Arduino Uno.
 
 ## Controller PCB
 
+The controller board is a two-stage amplifier.
+The signal from the microcontroller is first amplified using a BJT.
+This signal is then used to control a relay.
+
 ### First version
 
 The first version (revision 1.0.0) of the board has some flaws:
