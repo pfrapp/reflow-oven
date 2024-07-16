@@ -98,7 +98,18 @@ Resources
 
 ### Microcontroller
 
-We use an Arduino Uno.
+The original plan was to use an Arduino Uno.
+
+However, due to my better experience with the TI Tiva family,
+I decided to use the Tiva.
+It can be connected to the host PC via USB.
+
+Another benefit of this setup is that the direct host PC connection can
+be replaced by a Raspberry Pi that is in turn connected to
+the host PC via Wi-Fi.
+While this setup is a bit more complex, it allows
+for the complete galvanic isolation between host PC
+and reflow oven controller.
 
 ## Controller PCB
 
