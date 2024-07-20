@@ -56,6 +56,9 @@ static volatile usb_serial_data_pc_to_tiva usb_packet_recv;
 // The USB data packet that we are sending.
 static volatile usb_serial_data_tiva_to_pc usb_packet_sent;
 
+// 16-bit PWM value (0x0000 to 0xFFFF) for the controller
+static volatile uint16_t ui16_PWM_Controller = 0;
+
 
 //**********
 // ADC
@@ -453,6 +456,7 @@ RxHandler(void *pvCBData, uint32_t ui32Event, uint32_t ui32MsgValue,
             // data that has been received from the host.
             // ...
             //
+            ui16_PWM_Controller = usb_packet_recv.pwm_controller;
 
             // Send the current IMU data back.
             USBBufferWrite((tUSBBuffer *)&g_sTxBuffer, &usb_packet_sent, sizeof(usb_packet_sent));
@@ -717,6 +721,10 @@ int main(void)
 
 
     while(true) {
+        float pwm_percentage = 0.0f;
+        uint32_t clock_ticks_on = 0u;
+        uint32_t clock_ticks_off = 0u;
+
         // Trigger ADC conversion
         ADCProcessorTrigger(ADC0_BASE, ADC_SEQUENCE_NUM);
 
@@ -734,12 +742,23 @@ int main(void)
 
         // Put voltage on pin PF4.
         // Tested via measurement: works.
-        SysCtlDelay(SysCtlClockGet() / 2);
+        pwm_percentage = 100.0f * ui16_PWM_Controller / 0xFFFF;
+        clock_ticks_on = pwm_percentage * 0.01f * SysCtlClockGet() / 5;
+        clock_ticks_off = (100.0f - pwm_percentage) * 0.01f * SysCtlClockGet() / 5;
+        
+        // On
         turnOnBlueLed();
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_4);
-        SysCtlDelay(SysCtlClockGet() / 2);
+        if (clock_ticks_on > 0) {
+            // Do not pass 0, otherwise it waits forever.
+            SysCtlDelay(clock_ticks_on);
+        }
+        // Off
         turnOffBlueLed();
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_0);
+        if (clock_ticks_off > 0) {
+            SysCtlDelay(clock_ticks_off);
+        }
 
         //
         // -------------------------------------------------------------------------------------------

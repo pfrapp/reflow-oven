@@ -55,8 +55,8 @@ typedef struct usb_serial_data_tiva_to_pc_ {
 // Message from PC to Tiva.
 typedef struct usb_serial_data_pc_to_tiva_ {
 
-    // Motor direction (MSB) and speed.
-    uint16_t motor;
+    // 16-bit PWM value (0x0000 to 0xFFFF) for the controller.
+    uint16_t pwm_controller;
 
     // Any other business (status).
     uint16_t status;

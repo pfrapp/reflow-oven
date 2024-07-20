@@ -191,6 +191,8 @@ int main(void)
         // Write to serial port
         // unsigned char msg[] = { 'H', 'e', 'l', 'l', 'o' };
         // write(serial_port, msg, sizeof(msg));
+        usb_packet_to_tiva.pwm_controller = 0.5f * 0xFFFF;
+        usb_packet_to_tiva.status = 0;
         write(serial_port, &usb_packet_to_tiva, sizeof(usb_packet_to_tiva));
 
         // Allocate memory for read buffer, set size according to your needs
