@@ -1,4 +1,5 @@
 #include <sys/time.h>    // for timing functions and structures
+#include <stdlib.h>      // for NULL
 #include "timing.h"
 
 long long getMilliSecondsSinceEpoch() {
