@@ -40,7 +40,7 @@ int main(void)
     //
     // For communicating, you want to use the actual USB device.
     // (Change switch from Debug to Device).
-    const char virtualCOMPortName[] = "/dev/cu.usbmodem123456781";
+    const char virtualCOMPortName[] = "/dev/ttyACM0";
 
     // The USB data packet that we are sending.
     usb_serial_data_pc_to_tiva usb_packet_to_tiva;
@@ -89,6 +89,17 @@ int main(void)
         fprintf(stderr, "### Make sure the device is plugged in and the switch\n");
         fprintf(stderr, "### is set to DEVICE (not DEBUG)\n");
         fprintf(stderr, "### Exiting!\n");
+
+         // Gave error code 13 on the Raspberry Pi
+         // except when being run as root via sudo ./tiva_usb_connect
+         // In order to not resort to running the program as root, add the current user
+         // to the group dialout.
+         // Check if the device is attached to the group dialout either via ll in the
+         // /dev folder, or via stat /dev/ttyACM0 and look for Gid.
+         fprintf(stderr, "### On Linux, if the error code is 13, add your user to the dialout group.\n");
+         fprintf(stderr, "sudo usermod -a -G dialout $USER\n");
+         fprintf(stderr, "Reboot after you did this.\n");
+
         return -1;
     }
     printf("Successfully opened the serial port.\n");
