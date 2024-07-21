@@ -323,7 +323,7 @@ int main(void)
         // Ready for next sample.
         sample_index += 1;
 
-        if (diff_ms > 1000 * max_runtime_seconds) {
+        if (diff_ms >= 1000 * max_runtime_seconds) {
             break;
         }
     }
