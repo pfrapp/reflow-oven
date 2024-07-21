@@ -103,6 +103,9 @@ int main(void)
 
     int err;
 
+    int dummy1, dummy2;
+    int num_values_read;
+
     // Milliseconds since epoch at program start.
     // This means after the time that the connection to the Tiva has been established.
     long long milliseconds_since_epoch_at_start;
@@ -112,8 +115,9 @@ int main(void)
     int sample_time_ms;
     int max_runtime_seconds;
 
-    // File for logging measurement signals to.
-    FILE *log_fid;
+    // File for logging measurement signals to and reading the reference
+    // and control signals from.
+    FILE *log_fid, *reference_control_fid;
     int first_log_call;
 
     // BMP structures
@@ -130,6 +134,12 @@ int main(void)
     // Init logging
     log_fid = fopen("signals.log", "w");
     first_log_call = 1;
+
+    // Read the reference and control signals
+    reference_control_fid = fopen("reference_control_signals.log", "r");
+    // Skip the first line, see
+    // https://stackoverflow.com/questions/2799612/how-to-skip-a-line-when-fscanning-a-text-file
+    fscanf(reference_control_fid, "%*[^\n]\n");
 
 
     printf("*\n");
@@ -190,8 +200,7 @@ int main(void)
             diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
         } while (diff_ms < sample_index*sample_time_ms);
 
-        time_sec = 0.001f * diff_ms;
-        printf("--------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
+
 
         // printf("Power mode: 0x%02X\n", usb_packet_from_tiva.power_mode);
         // printf("Temperature: 0x%02X,0x%02X,0x%02X\n",
@@ -234,12 +243,8 @@ int main(void)
 
         bmp2_compensate_data(&raw_bmp_data, &physical_bmp_data, &bmp_device);
 
-        printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
-        printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
-
         // Convert thermocouple voltage
         thermocouple_voltage = ((float)usb_packet_from_tiva.amp_thermocouple_voltage / 4096) * 3.3;
-        printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
 
         // Digital thermocouple value
         digital_thermocouple = usb_packet_from_tiva.digital_amp_thermocouple & 0x0000FFFF;
@@ -249,8 +254,19 @@ int main(void)
             printf("Digital thermocouple is closed\n");
         }
         ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
-        printf("Digital thermocouple:  %f deg C\n", ctrl.temperature_deg_C);
 
+
+            // Read the reference and control signals from file.
+            num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
+                    &dummy1, &dummy2,
+                    &(ctrl.reference_deg_C),
+                    &(ctrl.pwm_controller_percent));
+            if (num_values_read == 4) {
+                // printf("ref %f, ctrl %f\n", ctrl.reference_deg_C, ctrl.pwm_controller_percent);
+            } else {
+                printf("Failed to read reference and control signals (num_values_read = %i)!\n", num_values_read);
+                printf("dummy1 = %i, dummy2 = %i\n", dummy1, dummy2);
+            }
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
@@ -287,6 +303,16 @@ int main(void)
         {
             printf("Did NOT read a dedicated Tiva-to-PC packet\n");
         }
+
+        // Print to terminal
+        time_sec = 0.001f * diff_ms;
+        printf("--------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
+        printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
+        printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
+        printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
+        printf("Digital thermocouple:  %6.2f deg C\n", ctrl.temperature_deg_C);
+        printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
+        printf("PWM controller signal: %6.2f \%\n", ctrl.pwm_controller_percent);
 
         // Log to file.
         logSignalSample(log_fid, sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
