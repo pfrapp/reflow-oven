@@ -250,23 +250,25 @@ int main(void)
         digital_thermocouple = usb_packet_from_tiva.digital_amp_thermocouple & 0x0000FFFF;
         if (digital_thermocouple & 0x0004) {
             printf("Digital thermocouple is open\n");
+            // printf("You will not receive any measurements -- Exiting!\n");
+            // return -1;
         } else {
-            printf("Digital thermocouple is closed\n");
+            // printf("Digital thermocouple is closed\n");
         }
         ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
 
 
-            // Read the reference and control signals from file.
-            num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
-                    &dummy1, &dummy2,
-                    &(ctrl.reference_deg_C),
-                    &(ctrl.pwm_controller_percent));
-            if (num_values_read == 4) {
-                // printf("ref %f, ctrl %f\n", ctrl.reference_deg_C, ctrl.pwm_controller_percent);
-            } else {
-                printf("Failed to read reference and control signals (num_values_read = %i)!\n", num_values_read);
-                printf("dummy1 = %i, dummy2 = %i\n", dummy1, dummy2);
-            }
+        // Read the reference and control signals from file.
+        num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
+                &dummy1, &dummy2,
+                &(ctrl.reference_deg_C),
+                &(ctrl.pwm_controller_percent));
+        if (num_values_read == 4) {
+            // printf("ref %f, ctrl %f\n", ctrl.reference_deg_C, ctrl.pwm_controller_percent);
+        } else {
+            printf("Failed to read reference and control signals (num_values_read = %i)!\n", num_values_read);
+            printf("dummy1 = %i, dummy2 = %i\n", dummy1, dummy2);
+        }
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
@@ -306,11 +308,11 @@ int main(void)
 
         // Print to terminal
         time_sec = 0.001f * diff_ms;
-        printf("--------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
-        printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
-        printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
-        printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
-        printf("Digital thermocouple:  %6.2f deg C\n", ctrl.temperature_deg_C);
+        printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
+        // printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
+        // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
+        // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
+        printf("Measured temperature:  %6.2f deg C\n", ctrl.temperature_deg_C);
         printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
         printf("PWM controller signal: %6.2f \%\n", ctrl.pwm_controller_percent);
 
