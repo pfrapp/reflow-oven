@@ -2,6 +2,15 @@
 // P. Rapp, Mar-23, 2024
 // Copied over from the self-balancing robot host main file.
 //
+// This is the main host program that runs the controller for
+// the reflow oven.
+//
+// We try and start with a PI controller.
+//
+// This program is also used for the system identification
+// by disabling the controller and giving a step function
+// onto the system (that is, the oven).
+//
 
 // C library headers
 #include <stdio.h>
@@ -26,7 +35,8 @@
 int main(void)
 {
 
-    // You can find this name by issuing
+    //
+    // On macOS, you can find the name of the virtual COM port by issuing
     // $ system_profiler SPUSBDataType
     // on the terminal.
     // Then you find the serial number of the respective USB device,
@@ -38,19 +48,21 @@ int main(void)
     // Serial Number: 0E230906
     // cu.usbmodem0E2309061
     //
-    // For communicating, you want to use the actual USB device.
-    // (Change switch from Debug to Device).
+    // On the Raspberry Pi, the name of the virtual COM
+    // port is /dev/ttyACM0
+    //
+    // Regarding the Tiva:
+    // For communicating (instead of flashing and debugging), you want to use the actual USB device.
+    // (Change the switch on the board from Debug to Device).
+    //
     const char virtualCOMPortName[] = "/dev/ttyACM0";
 
     // The USB data packet that we are sending.
     usb_serial_data_pc_to_tiva usb_packet_to_tiva;
-    int speed_percent;
-    int direction;
 
     // The USB data packet that we are receiving from the Tiva.
     usb_serial_data_tiva_to_pc usb_packet_from_tiva;
 
-    int ii;
     int err;
 
     // Milliseconds since epoch at program start.
@@ -200,8 +212,6 @@ int main(void)
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
 
         // Write to serial port
-        // unsigned char msg[] = { 'H', 'e', 'l', 'l', 'o' };
-        // write(serial_port, msg, sizeof(msg));
         usb_packet_to_tiva.pwm_controller = 0.5f * 0xFFFF;
         usb_packet_to_tiva.status = 0;
         write(serial_port, &usb_packet_to_tiva, sizeof(usb_packet_to_tiva));
@@ -209,9 +219,7 @@ int main(void)
         // Allocate memory for read buffer, set size according to your needs
         uint8_t read_buf[256];
 
-        // Normally you wouldn't do this memset() call, but since we will just receive
-        // ASCII data for this example, we'll set everything to 0 so we can
-        // call printf() easily.
+        // Set buffer to zero.
         memset(&read_buf, '\0', sizeof(read_buf));
 
         // Read bytes. The behaviour of read() (e.g. does it block?,
@@ -226,8 +234,7 @@ int main(void)
             return 1;
         }
 
-        // Check if we read a Tiva-To-PC structure.
-        // At the moment, num_bytes is expected to be 14.
+        // Check if we have read a Tiva-To-PC structure.
         if (num_bytes == sizeof(usb_serial_data_tiva_to_pc))
         {
             memcpy(&usb_packet_from_tiva, read_buf, num_bytes);
