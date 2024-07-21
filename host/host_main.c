@@ -31,6 +31,44 @@
 #include "bmp.h"
 
 
+enum {
+    // Open-loop control, use the control signal from the file.
+    open_loop = 0,
+    // Closed-loop control, use the reference signal from the file.
+    closed_loop
+};
+
+// The reference and control signals are saved in a file.
+//
+// Note: In closed-loop operation, the reference signal
+// is used and the control signal is computed.
+//
+// In open-loop operation, the control signal from the file
+// is used and the reference signal is discarded.
+
+// Structure and functions to hold information about the controller.
+// Put to separate file if needed.
+typedef struct controller_ {
+    // The control signal (in percent, from 0.0 to 100.0).
+    double pwm_controller_percent;
+
+    // The reference signal in degree Celcius.
+    double reference_deg_C;
+
+    // Measured temperature in degree Celcius.
+    double temperature_deg_C;
+
+    // Control error in degree Celcius.
+    double control_error_deg_C;
+
+    // Integrated control error (in degree Celcius times seoncs)
+    double integrated_control_error_deg_C_sec;
+
+    // Open or closed loop control.
+    int open_or_closed_loop;
+
+} controller;
+
 
 int main(void)
 {
@@ -82,6 +120,11 @@ int main(void)
     struct bmp2_dev bmp_device;
     struct bmp2_uncomp_data raw_bmp_data;
     struct bmp2_data physical_bmp_data;
+
+    // Controller data
+    controller ctrl;
+    ctrl.open_or_closed_loop = open_loop;
+    ctrl.pwm_controller_percent = 50.0;
 
 
     // Init logging
@@ -205,14 +248,15 @@ int main(void)
         } else {
             printf("Digital thermocouple is closed\n");
         }
-        printf("Digital thermocouple:  %f deg C\n", (digital_thermocouple >> 3) * 0.25f);
+        ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
+        printf("Digital thermocouple:  %f deg C\n", ctrl.temperature_deg_C);
 
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
 
         // Write to serial port
-        usb_packet_to_tiva.pwm_controller = 0.5f * 0xFFFF;
+        usb_packet_to_tiva.pwm_controller = 0.01f * ctrl.pwm_controller_percent * 0xFFFF;
         usb_packet_to_tiva.status = 0;
         write(serial_port, &usb_packet_to_tiva, sizeof(usb_packet_to_tiva));
 
@@ -245,8 +289,7 @@ int main(void)
         }
 
         // Log to file.
-        logSignalSample(log_fid, sample_index, diff_ms, physical_bmp_data.temperature,
-        physical_bmp_data.pressure, thermocouple_voltage, first_log_call);
+        logSignalSample(log_fid, sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
         first_log_call = 0;
 
         // Ready for next sample.
