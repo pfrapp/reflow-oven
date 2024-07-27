@@ -9,17 +9,20 @@ import matplotlib.pyplot as plt
 # %% Read the data
 
 path_prefix = './'
-meas_file = 'signals_step_20_percent.log'
+# Wenn man das Lab Supply nutzt und dann
+# noch eine OpAmp Impedanzwandler Schaltung
+# dann funktioniert das Signal
+meas_file = 'signals_step_30_percent_lab_supply_impedance_converter.log'
 df = pd.read_csv(path_prefix + meas_file)
 
-fig = plt.figure(meas_file)
+fig = plt.figure(meas_file, figsize=(7,12))
 plt.clf()
 
 ax = fig.add_subplot(3,1,1)
 ax.plot(df['Time (ms)'][1:]/1000, df['Temperature (C)'][1:],
          linestyle='-')
 ax.grid(True)
-ax.set(ylim=(20, 70))
+ax.set(ylim=(0, 300))
 ax.set(xlabel='t (s)')
 ax.set(ylabel='Temperature (C)')
 ax.set(title='Amplified thermocouple voltage')
