@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # %% Create signals
 
 sample_time_ms = 500
-max_runtime_seconds = 120
+max_runtime_seconds = 720
 
 # Time signal
 t = np.arange(0, max_runtime_seconds + sample_time_ms/1000, sample_time_ms/1000)

@@ -183,7 +183,7 @@ int main(void)
     // Sample time of 500 ms, corresponding to 2 Hz.
     sample_time_ms = 500;
     sample_index = 0;
-    max_runtime_seconds = 120;
+    max_runtime_seconds = 720;
 
 
     while (1)
