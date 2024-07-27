@@ -37,6 +37,17 @@ theta = df['Temperature (C)']
 theta_0 = np.mean(theta[1:40])
 print(f'theta_0 = {theta_0} deg C')
 
+# Delay of the step function
+step_delay = 30.0
+
+pt1_delay_params = {
+    'lag': 30.0,
+    'amplitude': 250.0,
+    'tau': 320.0
+}
+
+total_lag = step_delay + pt1_delay_params['lag']
+
 def exp_fit(t, lag, amp, tau):
     y = amp*(1-np.exp(-(t-lag)/tau))
     y[t < lag] = 0.0
@@ -48,9 +59,9 @@ plt.clf()
 ax = fig.add_subplot(3,1,1)
 ax.plot(t, theta - theta_0, linestyle='-')
 # Note that the step comes after 30 seconds, so the process lag is 30 seconds.
-ax.plot(t, exp_fit(t, 30+30, 250, 320), linestyle='--')
+ax.plot(t, exp_fit(t, total_lag, pt1_delay_params['amplitude'], pt1_delay_params['tau']), linestyle='--')
 # Tangente
-tang = 250*(t-(30+30))/320
+tang = pt1_delay_params['amplitude']*(t-total_lag)/pt1_delay_params['tau']
 ax.plot(t, tang, linestyle='--')
 ax.grid(True)
 # ax.set(xlim=(-10,30))
