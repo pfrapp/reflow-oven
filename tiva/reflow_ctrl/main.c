@@ -531,6 +531,8 @@ int main(void)
                        SYSCTL_XTAL_16MHZ);
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    // Wait for the GPIO module to be ready
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF));
 
     //
     // Enable the GPIO pins for the LED (PF2 & PF3).
@@ -543,6 +545,20 @@ int main(void)
     turnOffRedLed();
     turnOffGreenLed();
     turnOffBlueLed();
+
+    // Unlock PF4 for GPIO use
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_CR) |= GPIO_PIN_4;
+    HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = 0;
+
+    // Enable the PF4 pin to drive the LED.
+    // Configure PF4 as a GPIO output
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_4);
+
+    // Set the drive strength to 8 mA and configure the pin as standard push-pull
+    GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD);
+
+
 
     //
     // Enable I2C (that is, I2C1) on the following pins
