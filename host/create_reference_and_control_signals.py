@@ -15,12 +15,12 @@ t_ms = 1000*t
 t_ms = np.array(1000*t, dtype='int64')
 
 # Create step control signal
-# Step to 20%
-u = np.array([20 if tau > 10.0 else 0.0 for tau in t])
+# Step to 30%
+u = np.array([30 if tau > 30.0 else 0.0 for tau in t])
 
 # Create reference control signal
 # 40 deg Celcius
-w = np.array([40 if tau > 10.0 else 20.0 for tau in t])
+w = np.array([40 if tau > 30.0 else 20.0 for tau in t])
 
 # %% Plot
 
