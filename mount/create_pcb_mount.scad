@@ -35,8 +35,6 @@ height_pcb = 1.6;
 // the PCB
 height_holes = height_mount - 2*height_pcb;
 
-// Offset between holes in stencil mount
-stencil_mount_hole_offset = 40.0;
 
 module pcb() {
     cube([64, 79, height_pcb]);
