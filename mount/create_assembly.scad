@@ -2,10 +2,6 @@
 
 include <parameters.scad>
 
-// Thickness of the wall where the PCB is pushed against
-wall_thickness_mount = 11.0;
-// Space for the stencil (at the top and left)
-stencil_space = 7.0;
 
 
 translate([stencil_space+wall_thickness_mount,
@@ -23,11 +19,11 @@ translate([stencil_space,
 color([0.0, 0.7, 0.8])
     import("pcb_mount.stl");
 
-translate([0, 50-2, height_mount+0.15])
+translate([0, 50-6, height_mount+0.15])
     color([0.5, 0.5, 0.0])
         import("stencil_mount.stl");
 
-translate([24, 120, height_mount+0.15])
+translate([28, 120, height_mount+0.15])
     rotate([0,0,-90])
         color([0.5, 0.5, 0.0])
             import("stencil_mount.stl");
