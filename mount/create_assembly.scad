@@ -27,3 +27,12 @@ translate([28, 120, height_mount+0.15])
     rotate([0,0,-90])
         color([0.5, 0.5, 0.0])
             import("stencil_mount.stl");
+
+translate([77, 60, height_mount-4*height_pcb])
+    color([0.5, 0.0, 0.5])
+        import("plate.stl");
+
+translate([25, 28, height_mount-4*height_pcb])
+    rotate([0,0,-90])
+        color([0.5, 0.0, 0.5])
+            import("plate.stl");
