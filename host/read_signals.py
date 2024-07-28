@@ -12,7 +12,7 @@ path_prefix = './../measurements/2024-07-27/'
 # Wenn man das Lab Supply nutzt und dann
 # noch eine OpAmp Impedanzwandler Schaltung
 # dann funktioniert das Signal
-meas_file = 'signals_step_50_percent.log'
+meas_file = 'signals_step_30_percent.log'
 df = pd.read_csv(path_prefix + meas_file)
 
 fig = plt.figure(meas_file, figsize=(7,12))
@@ -42,7 +42,7 @@ step_delay = 30.0
 
 pt1_delay_params = {
     'lag': 30.0,
-    'amplitude': 250.0,
+    'amplitude': 250.0/50*30,
     'tau': 320.0
 }
 
@@ -67,12 +67,34 @@ ax.grid(True)
 # ax.set(xlim=(-10,30))
 # ax.set(ylim=(-10, 10))
 ax.set(xlim=(-20,800))
-ax.set(ylim=(-10, 250))
+ax.set(ylim=(-10, 200))
 ax.set(xlabel='t (s)')
 ax.set(ylabel='Temperature minus start temperature (C)')
 ax.set(title='Amplified thermocouple voltage')
 
 plt.show()
 
+
+# %% Ziegler-Nichols
+
+# Amplitude considering the step height
+# Step size of 50% = 0.5 --> Fitted amplitude = 250.0 deg C
+# Step size of 30% = 0.3 --> Fitted amplitude = 150.0 deg C
+# Extrapolated for step size of 1 --> Amplitude is 500 deg C
+# Lag is 30 seconds
+# Time constant tau is 320 seconds
+
+# Slope R
+R = 500.0 / pt1_delay_params['tau']
+L = pt1_delay_params['lag']
+
+# PI controller
+kP = 0.9 / (R*L)
+TI = L/0.3
+kI = kP/TI
+
+print(f'kP = {kP}')
+print(f'TI = {TI}')
+print(f'kI = {kI}')
 
 # %%
