@@ -21,6 +21,8 @@ g_fn = get_fn(g_detailed);
 
 
 height_mount = 12.0;
+length_mount = 100.0;
+width_mount = 120.0;
 height_pcb = 1.6;
 // Height of the center (axis) of the holes
 // for the horizontal screws that fixate
@@ -33,16 +35,16 @@ module pcb() {
 
 module pcb_mount() {
     difference() {
-        cube([100, 120, height_mount]);
+        cube([length_mount, width_mount, height_mount]);
         translate([10,0,height_mount-4*height_pcb])
             cube([90,110,4*height_pcb]);
-        translate([0,120,height_mount-4*height_pcb])
+        translate([0,width_mount,height_mount-4*height_pcb])
             rotate([0,0,-45])
                 translate([-50,-5,0])
-                    cube([100,10,4*height_pcb]);
+                    cube([length_mount,10,4*height_pcb]);
 
     }
-    translate([14, 120-50-14, 0])
+    translate([14, width_mount-50-14, 0])
         cube([50,50,height_mount-height_pcb]);
 }
 
