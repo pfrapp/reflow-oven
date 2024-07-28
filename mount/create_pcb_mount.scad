@@ -20,9 +20,15 @@ g_detailed = false;
 g_fn = get_fn(g_detailed);
 
 
-height_mount = 12.0;
-length_mount = 100.0;
-width_mount = 120.0;
+height_mount = 15.0;
+length_mount = 120.0;
+width_mount = 140.0;
+// Thickness of the wall where the PCB is pushed against
+wall_thickness_mount = 3.0;
+// Space for the stencil (at the top and left)
+stencil_space = 7.0;
+// Gap
+gap_mount = 4.0;
 height_pcb = 1.6;
 // Height of the center (axis) of the holes
 // for the horizontal screws that fixate
@@ -36,21 +42,23 @@ module pcb() {
 module pcb_mount() {
     difference() {
         cube([length_mount, width_mount, height_mount]);
-        translate([10,0,height_mount-4*height_pcb])
-            cube([90,110,4*height_pcb]);
+        translate([stencil_space+wall_thickness_mount,0,height_mount-4*height_pcb])
+            cube([length_mount-stencil_space-wall_thickness_mount,
+                  width_mount-stencil_space-wall_thickness_mount,4*height_pcb]);
         translate([0,width_mount,height_mount-4*height_pcb])
             rotate([0,0,-45])
                 translate([-50,-5,0])
                     cube([length_mount,10,4*height_pcb]);
 
     }
-    translate([14, width_mount-50-14, 0])
+    translate([stencil_space+wall_thickness_mount+gap_mount,
+               width_mount-50-(stencil_space+wall_thickness_mount+gap_mount), 0])
         cube([50,50,height_mount-height_pcb]);
 }
 
 module screw_mount() {
     screw_mount_thickness = 10.0;
-    screw_mount_height = 12.0;
+    screw_mount_height = height_mount;
     difference() {
         translate([0,0,0.5*screw_mount_height])
             cube([10,screw_mount_thickness,screw_mount_height], center=true);
@@ -69,7 +77,7 @@ module screw_mount() {
 
 translate([40,5,0])
     screw_mount();
-translate([95,70,0])
+translate([length_mount-5,width_mount-40,0])
     rotate([0,0,90])
         screw_mount();
 
