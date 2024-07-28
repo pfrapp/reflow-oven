@@ -1,8 +1,6 @@
 // Create the overall assembly to check before printing.
 
-height_mount = 12.0;
-height_pcb = 1.6;
-width_mount = 120.0;
+include <parameters.scad>
 
 // Thickness of the wall where the PCB is pushed against
 wall_thickness_mount = 11.0;

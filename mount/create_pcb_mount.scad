@@ -20,16 +20,9 @@ g_detailed = true;
 g_fn = get_fn(g_detailed);
 
 
-height_mount = 12.0;
-length_mount = 100.0;
-width_mount = 120.0;
-// Thickness of the wall where the PCB is pushed against
-wall_thickness_mount = 11.0;
-// Space for the stencil (at the top and left)
-stencil_space = 7.0;
 // Gap
 gap_mount = 4.0;
-height_pcb = 1.6;
+
 // Height of the center (axis) of the holes
 // for the horizontal screws that fixate
 // the PCB

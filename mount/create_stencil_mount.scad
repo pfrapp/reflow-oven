@@ -10,7 +10,7 @@ g_detailed = true;
 g_fn = get_fn(g_detailed);
 
 // wall_thickness_mount + stencil_space
-stencil_width = 11+7;
+stencil_width = wall_thickness_mount + stencil_space;
 
 stencil_height = 3.0;
 stencil_length = 50.0;
