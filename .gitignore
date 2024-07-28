@@ -8,6 +8,8 @@
 
 /mount/pcb_mount.stl
 /mount/stencil_mount.stl
+/mount/pcb.stl
+/mount/stencil.stl
 /mount/fab
 
 # Tiva
