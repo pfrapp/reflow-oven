@@ -13,14 +13,19 @@
 // space left: 16 / 2 = 8
 // space top: 21 / 2 = 10.5
 
-include <../parameters.scad>
+include <parameters.scad>
+
+function get_fn(detailed) = detailed ? 90 : 24;
+g_detailed = false;
+g_fn = get_fn(g_detailed);
+
 
 height = 12.0;
 height_pcb = 1.6;
 // Height of the center (axis) of the holes
 // for the horizontal screws that fixate
 // the PCB
-height_holes = height - 0.5*height_pcb;
+height_holes = height - 2*height_pcb;
 
 module pcb() {
     cube([64, 79, height_pcb]);
@@ -40,6 +45,31 @@ module pcb_mount() {
     translate([14, 120-50-14, 0])
         cube([50,50,height-height_pcb]);
 }
+
+module screw_mount() {
+    screw_mount_thickness = 10.0;
+    screw_mount_height = 12.0;
+    difference() {
+        translate([0,0,0.5*screw_mount_height])
+            cube([10,screw_mount_thickness,screw_mount_height], center=true);
+        // Through hole
+        translate([0,0,height_holes])
+            rotate([270,0,0])
+                translate([0,0,-0.5*screw_mount_thickness])
+                    cylinder(h = screw_mount_thickness, d = g_M3_through_hole_diameter_large, $fn = g_fn);
+        // Hole for mounting the threads
+        translate([0,0,height_holes])
+            rotate([270,0,0])
+                translate([0,0,-0.5*screw_mount_thickness])
+                    cylinder(h = g_M3_thread_depth, d = g_M3_thread_diameter, $fn = g_fn);
+    }
+}
+
+translate([40,5,0])
+    screw_mount();
+translate([95,70,0])
+    rotate([0,0,90])
+        screw_mount();
 
 pcb_mount();
 translate([10,120-79-10,height-height_pcb])
