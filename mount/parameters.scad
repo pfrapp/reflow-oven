@@ -20,3 +20,23 @@ g_M3_through_hole_diameter_large = 3.6;
 
 // Offset between holes in stencil mount
 stencil_mount_hole_offset = 40.0;
+
+// Outer dimension of the PCB mount part
+height_mount = 12.0;
+length_mount = 100.0;
+width_mount = 120.0;
+
+// Thickness of the wall where the PCB is pushed against.
+// This is used for the margins of the stencil which
+// is larger than the PCB.
+wall_thickness_mount = 11.0;
+
+// Space for the stencil (at the top and left).
+// Actually this is space for the stencil mount.
+stencil_space = 7.0;
+
+// Height of the PCB
+height_pcb = 1.6;
+
+// Height of the stencil
+height_stencil = 0.15;
