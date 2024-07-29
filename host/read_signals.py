@@ -43,7 +43,8 @@ step_delay = 30.0
 
 pt1_delay_params = {
     'lag': 30.0,
-    'amplitude': 250.0/50*30,
+    'amplitude': 250.0/50*30, # for 30% pwm
+    # 'amplitude': 250.0, # for 50% pwm
     'tau': 320.0
 }
 
@@ -76,6 +77,33 @@ ax.set(title='Amplified thermocouple voltage')
 plt.show()
 
 
+# %% Simulation via plant model
+
+# tf_pt1 = ctrl.tf([505.0], [320.0, 1.0])
+tf_pt1 = ctrl.tf([550.0], [370.0, 1.0])
+num, den = ctrl.pade(40, 5)
+tf_Td = ctrl.tf(num, den)
+G = ctrl.series(tf_Td, tf_pt1)
+
+fig = plt.figure('simulation', figsize=(7,12))
+plt.clf()
+ax = fig.add_subplot(3,1,1)
+
+t_step, h_step = ctrl.step_response(0.3*G)
+# The step in the measurement comes after 30 seconds
+t_step += 30.0
+ax.plot(t_step, h_step, linestyle='--', label='Simulation')
+ax.plot(t[1:], theta[1:] - theta_0, linestyle='-', label='Measurement')
+ax.set(xlim=(0,1500))
+# plt.xlim(0,300)
+# plt.ylim(-10,300)
+ax.grid(True)
+
+plt.show()
+
+# %% Validate the model
+
+
 # %% Ziegler-Nichols
 
 # Amplitude considering the step height
@@ -98,19 +126,7 @@ print(f'kP = {kP}')
 print(f'TI = {TI}')
 print(f'kI = {kI}')
 
-# %% Simulation
 
-tf1 = ctrl.tf([500.0], [pt1_delay_params['tau'], 1.0])
-num, den = ctrl.pade(30, 5)
-Td = ctrl.tf(num, den)
-G = ctrl.series(Td, tf1)
-
-t, h = ctrl.step_response(G)
-plt.plot(t,h)
-# plt.xlim(0,300)
-# plt.ylim(-10,300)
-plt.grid(True)
-plt.show()
 
 # %% Test the controller
 
@@ -124,7 +140,8 @@ plt.plot(t,h)
 plt.grid(True)
 plt.show()
 
-K_disrete = ctrl.sample_system(K, 0.1)
+K_disrete = ctrl.sample_system(K, 0.5)
 print(K_disrete)
+print(ctrl.ss(K_disrete))
 
 # %%
