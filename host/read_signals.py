@@ -5,6 +5,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import control as ctrl
 
 # %% Read the data
 
@@ -96,5 +97,34 @@ kI = kP/TI
 print(f'kP = {kP}')
 print(f'TI = {TI}')
 print(f'kI = {kI}')
+
+# %% Simulation
+
+tf1 = ctrl.tf([500.0], [pt1_delay_params['tau'], 1.0])
+num, den = ctrl.pade(30, 5)
+Td = ctrl.tf(num, den)
+G = ctrl.series(Td, tf1)
+
+t, h = ctrl.step_response(G)
+plt.plot(t,h)
+# plt.xlim(0,300)
+# plt.ylim(-10,300)
+plt.grid(True)
+plt.show()
+
+# %% Test the controller
+
+s = ctrl.tf('s')
+K = kP + kI/s
+
+closed_loop = ctrl.feedback(ctrl.series(K, G))
+
+t, h = ctrl.step_response(closed_loop)
+plt.plot(t,h)
+plt.grid(True)
+plt.show()
+
+K_disrete = ctrl.sample_system(K, 0.1)
+print(K_disrete)
 
 # %%
