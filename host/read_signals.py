@@ -13,7 +13,7 @@ path_prefix = './../measurements/2024-07-27/'
 # Wenn man das Lab Supply nutzt und dann
 # noch eine OpAmp Impedanzwandler Schaltung
 # dann funktioniert das Signal
-meas_file = 'signals_step_30_percent.log'
+meas_file = 'signals_step_50_percent.log'
 df = pd.read_csv(path_prefix + meas_file)
 
 fig = plt.figure(meas_file, figsize=(7,12))
@@ -43,8 +43,8 @@ step_delay = 30.0
 
 pt1_delay_params = {
     'lag': 30.0,
-    'amplitude': 250.0/50*30, # for 30% pwm
-    # 'amplitude': 250.0, # for 50% pwm
+    # 'amplitude': 250.0/50*30, # for 30% pwm
+    'amplitude': 250.0, # for 50% pwm
     'tau': 320.0
 }
 
@@ -79,8 +79,8 @@ plt.show()
 
 # %% Simulation via plant model
 
-# tf_pt1 = ctrl.tf([505.0], [320.0, 1.0])
-tf_pt1 = ctrl.tf([550.0], [370.0, 1.0])
+tf_pt1 = ctrl.tf([505.0], [320.0, 1.0]) # 50% pwm
+# tf_pt1 = ctrl.tf([550.0], [370.0, 1.0]) # 30% pwm
 num, den = ctrl.pade(40, 5)
 tf_Td = ctrl.tf(num, den)
 G = ctrl.series(tf_Td, tf_pt1)
@@ -89,7 +89,7 @@ fig = plt.figure('simulation', figsize=(7,12))
 plt.clf()
 ax = fig.add_subplot(3,1,1)
 
-t_step, h_step = ctrl.step_response(0.3*G)
+t_step, h_step = ctrl.step_response(0.5*G)
 # The step in the measurement comes after 30 seconds
 t_step += 30.0
 ax.plot(t_step, h_step, linestyle='--', label='Simulation')
@@ -143,5 +143,27 @@ plt.show()
 K_disrete = ctrl.sample_system(K, 0.5)
 print(K_disrete)
 print(ctrl.ss(K_disrete))
+
+# %% Reference signal from datasheet of the soldering paste
+
+profile = {
+    # time in seconds
+    't':     [0,    60,   120,   180,   240,   300,   315,   330,   350,   355,   360,   420],
+    # temperature in deg C
+    'theta': [50.0, 75.0, 105.0, 140.0, 160.0, 220.0, 240.0, 245.0, 217.0, 200.0, 180.0, 50.0]
+}
+
+fig = plt.figure('Reference profile')
+plt.clf()
+
+ax = fig.add_subplot(1,1,1)
+ax.plot(profile['t'], profile['theta'])
+ax.grid(True)
+ax.set(xlabel='t (s)')
+ax.set(ylabel='theta (deg C)')
+ax.set(xlim=(0,8*60))
+ax.set(ylim=(0,270))
+
+plt.show()
 
 # %%

@@ -170,6 +170,20 @@ Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
 
 ## Controller software
 
+### Modelling of the reflow oven dynamics
+
+The plant is modelled by a time delay followed by a first-order lag element.
+The parameters of the plant are infered by applying a step funtion
+onto the oven. A 30% and 50% PWM signal is used for the step height.
+Also, a 100% PWM step is applyied until a temperature of 100 deg C is reached.
+In that case, also the cooling down is measured.
+
+### Control design
+
+A PI controller is used for temperature control.
+The parameters of this PI controller are parameterized by the Ziegler-Nichols method.
+
+
 ## Tiva pin usage and connection
 
 | Pin on Tiva   | Connected with                                  | Description        |
