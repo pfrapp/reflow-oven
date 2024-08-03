@@ -224,6 +224,7 @@ int main(void)
     sample_index = 0;
     max_runtime_seconds = 720;
 
+    int ever_exceeded_100_degC = 0;
 
     while (1)
     {
@@ -296,6 +297,11 @@ int main(void)
         }
         ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
 
+        // Check if we ever exceeded 100 deg C.
+        if (ctrl.temperature_deg_C > 100.0) {
+            ever_exceeded_100_degC = 1;
+        }
+
 
         // Read the reference and control signals from file.
         num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
@@ -311,6 +317,12 @@ int main(void)
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
+
+        // Disable controller if the temperature was above 100 deg C.
+        if (ever_exceeded_100_degC) {
+            ctrl.pwm_controller_percent = 0.0;
+        }
+
 
         // Write to serial port
         usb_packet_to_tiva.pwm_controller = 0.01f * ctrl.pwm_controller_percent * 0xFFFF;
