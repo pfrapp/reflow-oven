@@ -23,12 +23,32 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h>  // write(), read(), close()
 #include <math.h>
+#include <sys/utsname.h> // For determining on which OS we are running
 
 #include "usb_serial_data.h"
 #include "logging.h"
 #include "timing.h"
 #include "usb_serial.h"
 #include "bmp.h"
+
+// Currently supported platforms
+enum {
+    platform_mac = 0,    // macOS
+    platform_rpi = 1,     // Raspberry Pi running Raspian
+    platform_invalid = 2
+};
+
+int get_platform() {
+    struct utsname unameData;
+    uname(&unameData);
+    if (strcmp(unameData.sysname, "Darwin") == 0) {
+        return platform_mac;
+    } else if (strcmp(unameData.sysname, "Raspian") == 0) {
+        // todo: check if it is really Raspian
+        return platform_rpi;
+    }
+    return platform_invalid;
+}
 
 
 enum {
@@ -73,6 +93,13 @@ typedef struct controller_ {
 int main(void)
 {
 
+    // Determine the OS (macOS or Raspian).
+    int platform = get_platform();
+    if (platform == platform_invalid) {
+        printf("Could not determine your OS, exiting\n");
+        return -1;
+    }
+
     //
     // On macOS, you can find the name of the virtual COM port by issuing
     // $ system_profiler SPUSBDataType
@@ -93,7 +120,19 @@ int main(void)
     // For communicating (instead of flashing and debugging), you want to use the actual USB device.
     // (Change the switch on the board from Debug to Device).
     //
-    const char virtualCOMPortName[] = "/dev/ttyACM0";
+    const char virtualCOMPortNameRaspberryPi[] = "/dev/ttyACM0";
+    const char virtualCOMPortNameMac[] = "/dev/cu.usbmodem123456781";
+    const char *virtualCOMPortName = NULL;
+    switch(platform) {
+        case platform_mac:
+            virtualCOMPortName = virtualCOMPortNameMac;
+            printf("* OS identified as Mac\n");
+            break;
+        case platform_rpi:
+            virtualCOMPortName = virtualCOMPortNameRaspberryPi;
+            printf("* OS identified as RPi\n");
+            break;
+    }
 
     // The USB data packet that we are sending.
     usb_serial_data_pc_to_tiva usb_packet_to_tiva;
