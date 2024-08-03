@@ -7,23 +7,42 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import control as ctrl
 
-# %% Read the data
+# %% Define the signals to be read
 
+# 30% PWM signal
+path_prefix = './../measurements/2024-07-27/'
+meas_file = 'signals_step_30_percent.log'
+signal_30 = path_prefix + meas_file
+
+# 50% PWM signal
 path_prefix = './../measurements/2024-07-27/'
 meas_file = 'signals_step_50_percent.log'
-df = pd.read_csv(path_prefix + meas_file)
+signal_50 = path_prefix + meas_file
 
-fig = plt.figure(meas_file, figsize=(7,12))
+# 100% PWM signal with stop after 100 deg C
+path_prefix = './../measurements/2024-08-03/'
+meas_file = 'signals_step_100_percent_until_100_degC_cooling_down_door_closed.log'
+signal_100_stop = path_prefix + meas_file
+
+
+# %% Read and plot the signals
+
+df = pd.read_csv(signal_30)
+
+fig = plt.figure(meas_file, figsize=(10,5))
 plt.clf()
 
-ax = fig.add_subplot(3,1,1)
+ax = fig.add_subplot(1,1,1)
 ax.plot(df['Time (ms)'][1:]/1000, df['Temperature (C)'][1:],
-         linestyle='-')
+         linestyle='-', label='Temperature (C)')
+ax.plot(df['Time (ms)'][1:]/1000, df['pwm_controller (percent)'][1:],
+         linestyle='--', label='PWM controller (percent)')
 ax.grid(True)
 ax.set(ylim=(0, 300))
 ax.set(xlabel='t (ms)')
-ax.set(ylabel='Temperature (C)')
+# ax.set(ylabel='Temperature (C)')
 ax.set(title='Amplified thermocouple voltage')
+ax.legend()
 
 plt.show()
 
