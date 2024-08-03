@@ -43,10 +43,11 @@ int get_platform() {
     uname(&unameData);
     if (strcmp(unameData.sysname, "Darwin") == 0) {
         return platform_mac;
-    } else if (strcmp(unameData.sysname, "Raspian") == 0) {
-        // todo: check if it is really Raspian
+    } else if (strcmp(unameData.sysname, "Linux") == 0) {
         return platform_rpi;
     }
+
+    printf("uname sysname: %s\n", unameData.sysname);
     return platform_invalid;
 }
 
