@@ -27,7 +27,7 @@ signal_100_stop = path_prefix + meas_file
 
 # %% Read and plot the signals
 
-df = pd.read_csv(signal_30)
+df = pd.read_csv(signal_100_stop)
 
 fig = plt.figure(meas_file, figsize=(10,5))
 plt.clf()
@@ -57,10 +57,12 @@ print(f'theta_0 = {theta_0} deg C')
 # Delay of the step function
 step_delay = 30.0
 
+# PWM percentage
+pwm_percent = 100.0
+
 pt1_delay_params = {
     'lag': 30.0,
-    # 'amplitude': 250.0/50*30, # for 30% pwm
-    'amplitude': 250.0, # for 50% pwm
+    'amplitude': 250.0/50*pwm_percent,
     'tau': 320.0
 }
 
@@ -95,8 +97,8 @@ plt.show()
 
 # %% Simulation via plant model
 
-tf_pt1 = ctrl.tf([505.0], [320.0, 1.0]) # 50% pwm
-# tf_pt1 = ctrl.tf([550.0], [370.0, 1.0]) # 30% pwm
+# tf_pt1 = ctrl.tf([505.0], [320.0, 1.0]) # 50% pwm
+tf_pt1 = ctrl.tf([550.0], [370.0, 1.0]) # 30% pwm
 num, den = ctrl.pade(40, 5)
 tf_Td = ctrl.tf(num, den)
 G = ctrl.series(tf_Td, tf_pt1)
@@ -105,7 +107,7 @@ fig = plt.figure('simulation', figsize=(7,12))
 plt.clf()
 ax = fig.add_subplot(3,1,1)
 
-t_step, h_step = ctrl.step_response(0.5*G)
+t_step, h_step = ctrl.step_response(0.01*pwm_percent*G)
 # The step in the measurement comes after 30 seconds
 t_step += 30.0
 ax.plot(t_step, h_step, linestyle='--', label='Simulation')
@@ -113,6 +115,45 @@ ax.plot(t[1:], theta[1:] - theta_0, linestyle='-', label='Measurement')
 ax.set(xlim=(0,1500))
 # plt.xlim(0,300)
 # plt.ylim(-10,300)
+ax.grid(True)
+
+plt.show()
+
+# %% Use the actual input signal
+
+# Model fitted to the 100% PWM step that turns off once 100 deg C are reached.
+tf_pt1_a = ctrl.tf([670.0], [30.0, 1.0])
+tf_pt1_b = ctrl.tf([1.0], [480.0, 1.0])
+num, den = ctrl.pade(22, 5)
+tf_Td = ctrl.tf(num, den)
+G = ctrl.series(tf_Td, tf_pt1_a, tf_pt1_b)
+
+
+# t = df['Time (ms)'] / 1000.0
+# t = t.to_numpy()
+# Make sure t is equally spaced
+t = np.arange(0,2*720+1)*0.5
+t = t[1:]
+
+theta = df['Temperature (C)'].to_numpy()
+# Do not start with 0 due to a non-existing meaningful measurement there.
+theta = theta[1:]
+theta_0 = np.mean(theta[:40])
+print(f'theta_0 = {theta_0} deg C')
+
+u = df['pwm_controller (percent)'].to_numpy() * 0.01
+u = u[1:]
+
+time_response = ctrl.forced_response(G, t, u, 0.0)
+
+fig = plt.figure('simulation', figsize=(10,5))
+plt.clf()
+ax = fig.add_subplot(1,1,1)
+
+ax.plot(t, u*100, linestyle='--', label='PWM (percent)')
+ax.plot(t, theta - theta_0, linestyle='-', label='Meas. temperature (minus offset)')
+ax.plot(t, time_response.outputs, linestyle='-', label='Sim. temperature (minus offset)')
+ax.legend()
 ax.grid(True)
 
 plt.show()
