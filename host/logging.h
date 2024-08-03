@@ -7,8 +7,7 @@
 
 int logSignalSample(FILE *log_fid, int index, int time_ms,
                     double temperature,
-                    double pressure,
-                    double amp_thermocouple_voltage,
+                    double pwm_controller,
                     int bWriteHeader);
 
 #endif // #ifndef LOGGING_H

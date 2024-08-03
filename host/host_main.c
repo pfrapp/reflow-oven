@@ -2,6 +2,15 @@
 // P. Rapp, Mar-23, 2024
 // Copied over from the self-balancing robot host main file.
 //
+// This is the main host program that runs the controller for
+// the reflow oven.
+//
+// We try and start with a PI controller.
+//
+// This program is also used for the system identification
+// by disabling the controller and giving a step function
+// onto the system (that is, the oven).
+//
 
 // C library headers
 #include <stdio.h>
@@ -22,11 +31,50 @@
 #include "bmp.h"
 
 
+enum {
+    // Open-loop control, use the control signal from the file.
+    open_loop = 0,
+    // Closed-loop control, use the reference signal from the file.
+    closed_loop
+};
+
+// The reference and control signals are saved in a file.
+//
+// Note: In closed-loop operation, the reference signal
+// is used and the control signal is computed.
+//
+// In open-loop operation, the control signal from the file
+// is used and the reference signal is discarded.
+
+// Structure and functions to hold information about the controller.
+// Put to separate file if needed.
+typedef struct controller_ {
+    // The control signal (in percent, from 0.0 to 100.0).
+    double pwm_controller_percent;
+
+    // The reference signal in degree Celcius.
+    double reference_deg_C;
+
+    // Measured temperature in degree Celcius.
+    double temperature_deg_C;
+
+    // Control error in degree Celcius.
+    double control_error_deg_C;
+
+    // Integrated control error (in degree Celcius times seoncs)
+    double integrated_control_error_deg_C_sec;
+
+    // Open or closed loop control.
+    int open_or_closed_loop;
+
+} controller;
+
 
 int main(void)
 {
 
-    // You can find this name by issuing
+    //
+    // On macOS, you can find the name of the virtual COM port by issuing
     // $ system_profiler SPUSBDataType
     // on the terminal.
     // Then you find the serial number of the respective USB device,
@@ -38,20 +86,25 @@ int main(void)
     // Serial Number: 0E230906
     // cu.usbmodem0E2309061
     //
-    // For communicating, you want to use the actual USB device.
-    // (Change switch from Debug to Device).
-    const char virtualCOMPortName[] = "/dev/cu.usbmodem123456781";
+    // On the Raspberry Pi, the name of the virtual COM
+    // port is /dev/ttyACM0
+    //
+    // Regarding the Tiva:
+    // For communicating (instead of flashing and debugging), you want to use the actual USB device.
+    // (Change the switch on the board from Debug to Device).
+    //
+    const char virtualCOMPortName[] = "/dev/ttyACM0";
 
     // The USB data packet that we are sending.
     usb_serial_data_pc_to_tiva usb_packet_to_tiva;
-    int speed_percent;
-    int direction;
 
     // The USB data packet that we are receiving from the Tiva.
     usb_serial_data_tiva_to_pc usb_packet_from_tiva;
 
-    int ii;
     int err;
+
+    int dummy1, dummy2;
+    int num_values_read;
 
     // Milliseconds since epoch at program start.
     // This means after the time that the connection to the Tiva has been established.
@@ -62,8 +115,9 @@ int main(void)
     int sample_time_ms;
     int max_runtime_seconds;
 
-    // File for logging measurement signals to.
-    FILE *log_fid;
+    // File for logging measurement signals to and reading the reference
+    // and control signals from.
+    FILE *log_fid, *reference_control_fid;
     int first_log_call;
 
     // BMP structures
@@ -71,10 +125,21 @@ int main(void)
     struct bmp2_uncomp_data raw_bmp_data;
     struct bmp2_data physical_bmp_data;
 
+    // Controller data
+    controller ctrl;
+    ctrl.open_or_closed_loop = open_loop;
+    ctrl.pwm_controller_percent = 50.0;
+
 
     // Init logging
     log_fid = fopen("signals.log", "w");
     first_log_call = 1;
+
+    // Read the reference and control signals
+    reference_control_fid = fopen("reference_control_signals.log", "r");
+    // Skip the first line, see
+    // https://stackoverflow.com/questions/2799612/how-to-skip-a-line-when-fscanning-a-text-file
+    fscanf(reference_control_fid, "%*[^\n]\n");
 
 
     printf("*\n");
@@ -89,6 +154,17 @@ int main(void)
         fprintf(stderr, "### Make sure the device is plugged in and the switch\n");
         fprintf(stderr, "### is set to DEVICE (not DEBUG)\n");
         fprintf(stderr, "### Exiting!\n");
+
+         // Gave error code 13 on the Raspberry Pi
+         // except when being run as root via sudo ./tiva_usb_connect
+         // In order to not resort to running the program as root, add the current user
+         // to the group dialout.
+         // Check if the device is attached to the group dialout either via ll in the
+         // /dev folder, or via stat /dev/ttyACM0 and look for Gid.
+         fprintf(stderr, "### On Linux, if the error code is 13, add your user to the dialout group.\n");
+         fprintf(stderr, "sudo usermod -a -G dialout $USER\n");
+         fprintf(stderr, "Reboot after you did this.\n");
+
         return -1;
     }
     printf("Successfully opened the serial port.\n");
@@ -107,7 +183,7 @@ int main(void)
     // Sample time of 500 ms, corresponding to 2 Hz.
     sample_time_ms = 500;
     sample_index = 0;
-    max_runtime_seconds = 10;
+    max_runtime_seconds = 720;
 
 
     while (1)
@@ -124,8 +200,7 @@ int main(void)
             diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
         } while (diff_ms < sample_index*sample_time_ms);
 
-        time_sec = 0.001f * diff_ms;
-        printf("--------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
+
 
         // printf("Power mode: 0x%02X\n", usb_packet_from_tiva.power_mode);
         // printf("Temperature: 0x%02X,0x%02X,0x%02X\n",
@@ -168,39 +243,45 @@ int main(void)
 
         bmp2_compensate_data(&raw_bmp_data, &physical_bmp_data, &bmp_device);
 
-        printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
-        printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
-
         // Convert thermocouple voltage
         thermocouple_voltage = ((float)usb_packet_from_tiva.amp_thermocouple_voltage / 4096) * 3.3;
-        printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
 
         // Digital thermocouple value
         digital_thermocouple = usb_packet_from_tiva.digital_amp_thermocouple & 0x0000FFFF;
         if (digital_thermocouple & 0x0004) {
             printf("Digital thermocouple is open\n");
+            // printf("You will not receive any measurements -- Exiting!\n");
+            // return -1;
         } else {
-            printf("Digital thermocouple is closed\n");
+            // printf("Digital thermocouple is closed\n");
         }
-        printf("Digital thermocouple:  %f deg C\n", (digital_thermocouple >> 3) * 0.25f);
+        ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
 
+
+        // Read the reference and control signals from file.
+        num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
+                &dummy1, &dummy2,
+                &(ctrl.reference_deg_C),
+                &(ctrl.pwm_controller_percent));
+        if (num_values_read == 4) {
+            // printf("ref %f, ctrl %f\n", ctrl.reference_deg_C, ctrl.pwm_controller_percent);
+        } else {
+            printf("Failed to read reference and control signals (num_values_read = %i)!\n", num_values_read);
+            printf("dummy1 = %i, dummy2 = %i\n", dummy1, dummy2);
+        }
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
 
         // Write to serial port
-        // unsigned char msg[] = { 'H', 'e', 'l', 'l', 'o' };
-        // write(serial_port, msg, sizeof(msg));
-        usb_packet_to_tiva.pwm_controller = 0.5f * 0xFFFF;
+        usb_packet_to_tiva.pwm_controller = 0.01f * ctrl.pwm_controller_percent * 0xFFFF;
         usb_packet_to_tiva.status = 0;
         write(serial_port, &usb_packet_to_tiva, sizeof(usb_packet_to_tiva));
 
         // Allocate memory for read buffer, set size according to your needs
         uint8_t read_buf[256];
 
-        // Normally you wouldn't do this memset() call, but since we will just receive
-        // ASCII data for this example, we'll set everything to 0 so we can
-        // call printf() easily.
+        // Set buffer to zero.
         memset(&read_buf, '\0', sizeof(read_buf));
 
         // Read bytes. The behaviour of read() (e.g. does it block?,
@@ -215,8 +296,7 @@ int main(void)
             return 1;
         }
 
-        // Check if we read a Tiva-To-PC structure.
-        // At the moment, num_bytes is expected to be 14.
+        // Check if we have read a Tiva-To-PC structure.
         if (num_bytes == sizeof(usb_serial_data_tiva_to_pc))
         {
             memcpy(&usb_packet_from_tiva, read_buf, num_bytes);
@@ -226,15 +306,24 @@ int main(void)
             printf("Did NOT read a dedicated Tiva-to-PC packet\n");
         }
 
+        // Print to terminal
+        time_sec = 0.001f * diff_ms;
+        printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
+        // printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
+        // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
+        // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
+        printf("Measured temperature:  %6.2f deg C\n", ctrl.temperature_deg_C);
+        printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
+        printf("PWM controller signal: %6.2f \%\n", ctrl.pwm_controller_percent);
+
         // Log to file.
-        logSignalSample(log_fid, sample_index, diff_ms, physical_bmp_data.temperature,
-        physical_bmp_data.pressure, thermocouple_voltage, first_log_call);
+        logSignalSample(log_fid, sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
         first_log_call = 0;
 
         // Ready for next sample.
         sample_index += 1;
 
-        if (diff_ms > 1000 * max_runtime_seconds) {
+        if (diff_ms >= 1000 * max_runtime_seconds) {
             break;
         }
     }

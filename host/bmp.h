@@ -2,6 +2,7 @@
 #define BMP_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 // Use selected structures and functions from the BMP API.
 #define BMP2_OK                                       INT8_C(0)
