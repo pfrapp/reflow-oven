@@ -98,9 +98,24 @@ Resources
 
 ### Microcontroller
 
-We use an Arduino Uno.
+The original plan was to use an Arduino Uno.
+
+However, due to my better experience with the TI Tiva family,
+I decided to use the Tiva.
+It can be connected to the host PC via USB.
+
+Another benefit of this setup is that the direct host PC connection can
+be replaced by a Raspberry Pi that is in turn connected to
+the host PC via Wi-Fi.
+While this setup is a bit more complex, it allows
+for the complete galvanic isolation between host PC
+and reflow oven controller.
 
 ## Controller PCB
+
+The controller board is a two-stage amplifier.
+The signal from the microcontroller is first amplified using a BJT.
+This signal is then used to control a relay.
 
 ### First version
 
@@ -157,14 +172,18 @@ Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
 
 ## Tiva pin usage and connection
 
-| Pin on Tiva   | Connected with                           | Description        |
-|---------------|-----------------------------------------:|-------------------:|
-| GND           | Thermo amplifier GND                     | Ground             |
-| PE3           | Thermo amplifier between 6.8k and 18k    | ADC input          |
-| GND           | GND of BMP280 evaluation board           | Ground             |
-| +3.3V         | VCC of BMP280 evaluation board           | Supply voltage     |
-| PA6           | SCL of BMP280 evaluation board           | I2C clock          |
-| PA7           | SDA of BMP280 evaluation board           | I2C data           |
+| Pin on Tiva   | Connected with                                  | Description        |
+|---------------|------------------------------------------------:|-------------------:|
+| GND           | Analog Thermo amplifier GND                     | Ground             |
+| PE3           | Analog Thermo amplifier between 6.8k and 18k    | ADC input          |
+| GND           | GND of BMP280 evaluation board                  | Ground             |
+| +3.3V         | VCC of BMP280 evaluation board                  | Supply voltage     |
+| PA6           | SCL of BMP280 evaluation board                  | I2C clock          |
+| PA7           | SDA of BMP280 evaluation board                  | I2C data           |
+| PB6           | Digital Thermo amplifier MISO                   | SPI data           |
+| PB5           | Digital Thermo amplifier CS                     | SPI CS             |
+| PB4           | Digital Thermo amplifier Clock                  | SPI clock          |
+| PF4           | Controller board pin 2                          | Relay control      |
 
 See also the following block diagram overview.
 

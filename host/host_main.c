@@ -114,6 +114,7 @@ int main(void)
     {
         float time_sec;
         float thermocouple_voltage;
+        uint16_t digital_thermocouple;
 
 
         // Idle (wait) until the sampling interval is over.
@@ -174,6 +175,15 @@ int main(void)
         thermocouple_voltage = ((float)usb_packet_from_tiva.amp_thermocouple_voltage / 4096) * 3.3;
         printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
 
+        // Digital thermocouple value
+        digital_thermocouple = usb_packet_from_tiva.digital_amp_thermocouple & 0x0000FFFF;
+        if (digital_thermocouple & 0x0004) {
+            printf("Digital thermocouple is open\n");
+        } else {
+            printf("Digital thermocouple is closed\n");
+        }
+        printf("Digital thermocouple:  %f deg C\n", (digital_thermocouple >> 3) * 0.25f);
+
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
@@ -181,6 +191,8 @@ int main(void)
         // Write to serial port
         // unsigned char msg[] = { 'H', 'e', 'l', 'l', 'o' };
         // write(serial_port, msg, sizeof(msg));
+        usb_packet_to_tiva.pwm_controller = 0.5f * 0xFFFF;
+        usb_packet_to_tiva.status = 0;
         write(serial_port, &usb_packet_to_tiva, sizeof(usb_packet_to_tiva));
 
         // Allocate memory for read buffer, set size according to your needs

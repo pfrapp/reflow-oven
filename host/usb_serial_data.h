@@ -45,6 +45,9 @@ typedef struct usb_serial_data_tiva_to_pc_ {
     // Amplified thermocouple voltage.
     uint32_t amp_thermocouple_voltage;
 
+    // Value read from the digital thermocouple (only lower 16 bits are valid).
+    uint32_t digital_amp_thermocouple;
+
 
 } usb_serial_data_tiva_to_pc;
 
@@ -52,8 +55,8 @@ typedef struct usb_serial_data_tiva_to_pc_ {
 // Message from PC to Tiva.
 typedef struct usb_serial_data_pc_to_tiva_ {
 
-    // Motor direction (MSB) and speed.
-    uint16_t motor;
+    // 16-bit PWM value (0x0000 to 0xFFFF) for the controller.
+    uint16_t pwm_controller;
 
     // Any other business (status).
     uint16_t status;
