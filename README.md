@@ -168,6 +168,23 @@ Set R1 to 56 Ohm?
 
 Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
 
+### Impedance converter
+
+Due to the switching of the relay, there are some voltage spikes on the transistor,
+that is, on the low voltage side of the relay.
+
+Those spikes are less pronounced when using the lab supply and more
+pronounced when using the AD/DC converter.
+They are there in any case though.
+
+For this reason, an impedance converter or buffer is needed between the
+uC pin and the controller board.
+
+So far I tested the setup using this impedance converter and a lab supply
+and it works.
+In oder to test it without the lab supply I need a second AC/DC converter,
+as the OpAmp needs a dual rail supply.
+
 ## Controller software
 
 ### Modelling of the reflow oven dynamics

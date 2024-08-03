@@ -10,9 +10,6 @@ import control as ctrl
 # %% Read the data
 
 path_prefix = './../measurements/2024-07-27/'
-# Wenn man das Lab Supply nutzt und dann
-# noch eine OpAmp Impedanzwandler Schaltung
-# dann funktioniert das Signal
 meas_file = 'signals_step_50_percent.log'
 df = pd.read_csv(path_prefix + meas_file)
 
