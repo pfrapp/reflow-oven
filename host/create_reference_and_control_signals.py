@@ -15,8 +15,8 @@ t_ms = 1000*t
 t_ms = np.array(1000*t, dtype='int64')
 
 # Create step control signal
-# Step to 30%
-u = np.array([30 if tau > 30.0 else 0.0 for tau in t])
+# Step to 100%
+u = np.array([100 if tau > 30.0 else 0.0 for tau in t])
 
 # Create reference control signal
 # 40 deg Celcius
