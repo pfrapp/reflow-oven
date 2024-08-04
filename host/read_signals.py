@@ -122,7 +122,7 @@ plt.show()
 # %% Use the actual input signal
 
 # Model fitted to the 100% PWM step that turns off once 100 deg C are reached.
-tf_pt1_a = ctrl.tf([670.0], [30.0, 1.0])
+tf_pt1_a = ctrl.tf([6.7], [30.0, 1.0])
 tf_pt1_b = ctrl.tf([1.0], [480.0, 1.0])
 num, den = ctrl.pade(22, 5)
 tf_Td = ctrl.tf(num, den)
@@ -141,7 +141,7 @@ theta = theta[1:]
 theta_0 = np.mean(theta[:40])
 print(f'theta_0 = {theta_0} deg C')
 
-u = df['pwm_controller (percent)'].to_numpy() * 0.01
+u = df['pwm_controller (percent)'].to_numpy()
 u = u[1:]
 
 time_response = ctrl.forced_response(G, t, u, 0.0)
@@ -150,7 +150,7 @@ fig = plt.figure('simulation', figsize=(10,5))
 plt.clf()
 ax = fig.add_subplot(1,1,1)
 
-ax.plot(t, u*100, linestyle='--', label='PWM (percent)')
+ax.plot(t, u, linestyle='--', label='PWM (percent)')
 ax.plot(t, theta - theta_0, linestyle='-', label='Meas. temperature (minus offset)')
 ax.plot(t, time_response.outputs, linestyle='-', label='Sim. temperature (minus offset)')
 ax.legend()
@@ -204,8 +204,8 @@ print(ctrl.ss(K_disrete))
 # %% Own controller design
 
 # Todo: check PWM signal limits
-Kp = ctrl.tf([0.005], [1.0])
-Ki = ctrl.tf([0.000010], [1.0, 0.0])
+Kp = ctrl.tf([0.5], [1.0])
+Ki = ctrl.tf([0.0010], [1.0, 0.0])
 K = ctrl.parallel(Kp, Ki)
 
 closed_loop = ctrl.feedback(ctrl.series(K, G))
