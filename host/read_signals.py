@@ -201,6 +201,21 @@ K_disrete = ctrl.sample_system(K, 0.5)
 print(K_disrete)
 print(ctrl.ss(K_disrete))
 
+# %% Own controller design
+
+# Todo: check PWM signal limits
+Kp = ctrl.tf([0.005], [1.0])
+Ki = ctrl.tf([0.000010], [1.0, 0.0])
+K = ctrl.parallel(Kp, Ki)
+
+closed_loop = ctrl.feedback(ctrl.series(K, G))
+
+t, h = ctrl.step_response(100*closed_loop)
+plt.plot(t,h)
+plt.grid(True)
+plt.show()
+
+
 # %% Reference signal from datasheet of the soldering paste
 
 profile = {
