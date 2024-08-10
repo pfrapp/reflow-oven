@@ -212,6 +212,23 @@ closed_loop = ctrl.feedback(ctrl.series(K, G))
 
 t, h = ctrl.step_response(100*closed_loop)
 plt.plot(t,h)
+plt.xlim([0,720])
+plt.grid(True)
+plt.show()
+
+# %% Get intermediate signals as well
+
+G = ctrl.tf(G, inputs='u', outputs='y')
+K = ctrl.tf(K, inputs='e', outputs='u')
+sumblk = ctrl.summing_junction(inputs=['r', '-y'], output='e')
+T = ctrl.interconnect([G, K, sumblk], inputs='r', outputs=['y', 'u', 'e'])
+
+time_response = ctrl.step_response(T)
+plt.plot(time_response.t, np.squeeze(time_response.y[0,...]), label='y')
+plt.plot(time_response.t, np.squeeze(time_response.y[1,...]), label='u')
+plt.plot(time_response.t, np.squeeze(time_response.y[2,...]), label='e')
+plt.legend()
+plt.xlim([0,720])
 plt.grid(True)
 plt.show()
 
