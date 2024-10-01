@@ -23,12 +23,33 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h>  // write(), read(), close()
 #include <math.h>
+#include <sys/utsname.h> // For determining on which OS we are running
 
 #include "usb_serial_data.h"
 #include "logging.h"
 #include "timing.h"
 #include "usb_serial.h"
 #include "bmp.h"
+
+// Currently supported platforms
+enum {
+    platform_mac = 0,    // macOS
+    platform_rpi = 1,     // Raspberry Pi running Raspian
+    platform_invalid = 2
+};
+
+int get_platform() {
+    struct utsname unameData;
+    uname(&unameData);
+    if (strcmp(unameData.sysname, "Darwin") == 0) {
+        return platform_mac;
+    } else if (strcmp(unameData.sysname, "Linux") == 0) {
+        return platform_rpi;
+    }
+
+    printf("uname sysname: %s\n", unameData.sysname);
+    return platform_invalid;
+}
 
 
 enum {
@@ -73,6 +94,13 @@ typedef struct controller_ {
 int main(void)
 {
 
+    // Determine the OS (macOS or Raspian).
+    int platform = get_platform();
+    if (platform == platform_invalid) {
+        printf("Could not determine your OS, exiting\n");
+        return -1;
+    }
+
     //
     // On macOS, you can find the name of the virtual COM port by issuing
     // $ system_profiler SPUSBDataType
@@ -93,7 +121,19 @@ int main(void)
     // For communicating (instead of flashing and debugging), you want to use the actual USB device.
     // (Change the switch on the board from Debug to Device).
     //
-    const char virtualCOMPortName[] = "/dev/ttyACM0";
+    const char virtualCOMPortNameRaspberryPi[] = "/dev/ttyACM0";
+    const char virtualCOMPortNameMac[] = "/dev/cu.usbmodem123456781";
+    const char *virtualCOMPortName = NULL;
+    switch(platform) {
+        case platform_mac:
+            virtualCOMPortName = virtualCOMPortNameMac;
+            printf("* OS identified as Mac\n");
+            break;
+        case platform_rpi:
+            virtualCOMPortName = virtualCOMPortNameRaspberryPi;
+            printf("* OS identified as RPi\n");
+            break;
+    }
 
     // The USB data packet that we are sending.
     usb_serial_data_pc_to_tiva usb_packet_to_tiva;
@@ -185,6 +225,7 @@ int main(void)
     sample_index = 0;
     max_runtime_seconds = 720;
 
+    int ever_exceeded_100_degC = 0;
 
     while (1)
     {
@@ -257,6 +298,11 @@ int main(void)
         }
         ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
 
+        // Check if we ever exceeded 100 deg C.
+        if (ctrl.temperature_deg_C > 100.0) {
+            ever_exceeded_100_degC = 1;
+        }
+
 
         // Read the reference and control signals from file.
         num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
@@ -272,6 +318,12 @@ int main(void)
 
         current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
+
+        // Disable controller if the temperature was above 100 deg C.
+        if (ever_exceeded_100_degC) {
+            ctrl.pwm_controller_percent = 0.0;
+        }
+
 
         // Write to serial port
         usb_packet_to_tiva.pwm_controller = 0.01f * ctrl.pwm_controller_percent * 0xFFFF;
