@@ -6,6 +6,13 @@
 /box/lid.stl
 /box/fab
 
+/mount/pcb_mount.stl
+/mount/stencil_mount.stl
+/mount/pcb.stl
+/mount/stencil.stl
+/mount/plate.stl
+/mount/fab
+
 # Tiva
 /tiva/RemoteSystemsTempFiles/
 /tiva/.jxbrowser.userdata/
