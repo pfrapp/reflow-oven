@@ -50,15 +50,16 @@ to a mains voltage signal.
 
 Here is an overview of the essential required components.
 
-| Component            | Manufacturer  | Description                                        | Distributor  | Order no.       | Price (Euro)  |
-|----------------------|---------------|----------------------------------------------------|--------------|-----------------|---------------|
-| SSR                  | Finder        | Steck-/Printrelais, 1x UM, 250V/10A, 5V, RM3,2     | Reichelt     | FIN 43.41.7 5V  | 5.95          |
-| Temperatur probe     | UNI-T         | Temperaturfuehler, Typ K, universal                | Reichelt     | UT TF-K         | 3.95          |
-| Arduino Uno          | Arduino       | Arduino A000066 Board UNO Rev3 DIL Core ATMega328  | Voelkner     | A435401         | 22.29         |
-| Pizza oven           | Severin       | TO 2045                                            | eBay         |                 |               |
-| Fuse                 |               |                                                    |              |                 |               |
-| Fuse holder          |               |                                                    |              |                 |               |
-| SPI module           |               | ARD SEN MAX6675 (incl. cold junction compensation) |              |                 |               |
+| Component                | Manufacturer      | Description                                            | Distributor   | Order no.       | Price (Euro)  |
+|--------------------------|-------------------|--------------------------------------------------------|---------------|-----------------|---------------|
+| SSR                      | Finder            | Steck-/Printrelais, 1x UM, 250V/10A, 5V, RM3,2         | Reichelt      | FIN 43.41.7 5V  | 5.95          |
+| Temperatur probe         | UNI-T             | Temperaturfuehler, Typ K, universal                    | Reichelt      | UT TF-K         | 3.95          |
+| ~~Arduino Uno~~          | ~~Arduino~~       | ~~Arduino A000066 Board UNO Rev3 DIL Core ATMega328~~  | ~~Voelkner~~  | ~~A435401~~     | ~~22.29~~     |
+| Cortex M4 Eval Board     | TI                | TM4C1236 Evaluation Board with breakout pins           | DigiKey       | 2314937         | ca. 18        |
+| Pizza oven               | Severin           | TO 2045 Oven, 1500 W, 100 to 230 deg C                 | Amazon        |                 | 60            |
+| Fuse                     |                   | Feinsicherung 5x20mm, superflink (ff), 8A              | Reichelt      | ESKA 520.126    | ca. 2         |
+| Fuse holder              |                   | 5 x 20 mm, 250 V, 10 A, black                          | Reichelt      | SCH 31010045    | 1.50          |
+| Temperature converter    | Maxim Integrated  | MAX6675 (incl. cold junction compensation)             | Voelkner      | R025452         | ca. 7         |
 
 ### SSR
 
