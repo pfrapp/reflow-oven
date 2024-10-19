@@ -3,6 +3,7 @@
 /controller/*.zip
 
 /box/box.stl
+/box/tiva_box_addon.stl
 /box/lid.stl
 /box/fab
 
