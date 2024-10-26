@@ -524,6 +524,9 @@ int main(void)
     uint8_t ui8ConfigRegisterValue;
     uint8_t ui8TrimmingValues[24];
 
+    // Do we want to use the BMP280?
+    const int bUseTemperatureSensor = 1;
+
     // We use 16 bit out of those 32 bit.
     uint32_t ui32DigitalThermocoupleData;
 
@@ -579,9 +582,9 @@ int main(void)
     I2CMasterInitExpClk(I2C1_BASE, SysCtlClockGet(), false);
 
     //
-    // Read out the Who-Am-I register
+    // Read out the Who-Am-I register of the BMP280 temperature sensor
     //
-    if (0) {
+    if (bUseTemperatureSensor) {
         uint8_t who_am_i_register_value = 0;
         readIMURegister(TEMPERATURE_SENSOR_REGISTER_WHO_AM_I, &who_am_i_register_value);
         SysCtlDelay(SysCtlClockGet() / 3 / 4000);
@@ -623,14 +626,14 @@ int main(void)
     // the sensor sends 0x80000
     ui8ControlRegisterValue = (0x01 << 5) | (0x03 << 2) | 0x03;
     ui8ConfigRegisterValue = 0x10 << 2;
-    if (0) {
+    if (bUseTemperatureSensor) {
         writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, ui8ControlRegisterValue);
         writeIMURegister(TEMPERATURE_SENSOR_REGISTER_CONFIG_REGISTER, ui8ConfigRegisterValue);
     }
 
     // Read the trimming values (calibration values).
     // The LSB comes first.
-    if (0) {
+    if (bUseTemperatureSensor) {
         readConsecutiveIMURegisters(0x88, 24, ui8TrimmingValues);
         usb_packet_sent.dig_T1 = (uint16_t) ((ui8TrimmingValues[0] << 0) + (ui8TrimmingValues[1] << 8));
         usb_packet_sent.dig_T2 = (int16_t) ((ui8TrimmingValues[2] << 0) + (ui8TrimmingValues[3] << 8));
@@ -780,7 +783,7 @@ int main(void)
         // -------------------------------------------------------------------------------------------
         // Read the BMP280
         //
-        if (0) {
+        if (bUseTemperatureSensor) {
 
         // Read the power mode
         readIMURegister(TEMPERATURE_SENSOR_REGISTER_CONTROL_REGISTER, &ui8ControlRegisterValue);
