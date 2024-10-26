@@ -361,7 +361,7 @@ int main(void)
         // Print to terminal
         time_sec = 0.001f * diff_ms;
         printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
-        // printf("Temperature:          % 6.2f C\n", physical_bmp_data.temperature);
+        printf("Temperature:           % 6.2f C\n", physical_bmp_data.temperature);
         // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
         // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
         printf("Measured temperature:  %6.2f deg C\n", ctrl.temperature_deg_C);
