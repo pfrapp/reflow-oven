@@ -366,7 +366,7 @@ int main(void)
         // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
         printf("Measured temperature:  %6.2f deg C\n", ctrl.temperature_deg_C);
         printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
-        printf("PWM controller signal: %6.2f \%\n", ctrl.pwm_controller_percent);
+        printf("PWM controller signal: %6.2f %%\n", ctrl.pwm_controller_percent);
 
         // Log to file.
         logSignalSample(log_fid, sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
