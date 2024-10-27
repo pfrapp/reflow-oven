@@ -312,6 +312,10 @@ int main(void)
             ever_exceeded_100_degC = 1;
         }
 
+        // Fill sample index and ambient temperature values into the current measurement sample.
+        current_reflow_oven_signals.index = control_and_measurement_parameters.sample_index;
+        current_reflow_oven_signals.ambient_temperature_deg_C = physical_bmp_data.temperature;
+
 
         // Read the reference and control signals from file.
         num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
@@ -380,10 +384,9 @@ int main(void)
         // Log to file.
         if (control_and_measurement_parameters.sample_index >= 0) {
             logSignalSample(&logging,
-                            control_and_measurement_parameters.sample_index,
-                            timing.diff_ms,
-                            current_reflow_oven_signals.oven_temperature_deg_C,
-                            current_reflow_oven_signals.pwm_controller_percent);
+                            &control_and_measurement_parameters,
+                            &timing,
+                            &current_reflow_oven_signals);
         }
 
         // Ready for next sample.
