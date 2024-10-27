@@ -1,20 +1,25 @@
 #include "logging.h"
 
-int logSignalSample(FILE *log_fid, int index, int time_ms,
+int logSignalSample(measurement_logging *logging,
+                    int index, int time_ms,
                     double temperature,
-                    double pwm_controller,
-                    int bWriteHeader) {
+                    double pwm_controller) {
 
-    if (!log_fid) {
+    if (!logging) {
         return -1;
     }
 
-    if (bWriteHeader) {
-        fprintf(log_fid, "Index,Time (ms),Temperature (C),pwm_controller (percent)\n");
+    if (!logging->log_fid) {
+        return -1;
+    }
+
+    if (logging->first_log_call) {
+        fprintf(logging->log_fid, "Index,Time (ms),Temperature (C),pwm_controller (percent)\n");
+        logging->first_log_call = 0;
     }
 
     //
-    fprintf(log_fid, "%05i,%09i,%06.2f,%06.2f\n",
+    fprintf(logging->log_fid, "%05i,%09i,%06.2f,%06.2f\n",
             index, time_ms,
             temperature,
             pwm_controller);

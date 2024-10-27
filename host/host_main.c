@@ -155,8 +155,8 @@ int main(void)
 
     // File for logging measurement signals to and reading the reference
     // and control signals from.
-    FILE *log_fid, *reference_control_fid;
-    int first_log_call;
+    FILE *reference_control_fid;
+    measurement_logging logging;
 
     // BMP structures
     struct bmp2_dev bmp_device;
@@ -173,8 +173,8 @@ int main(void)
 
 
     // Init logging
-    log_fid = fopen("signals.log", "w");
-    first_log_call = 1;
+    logging.log_fid = fopen("signals.log", "w");
+    logging.first_log_call = 1;
 
     // Read the reference and control signals
     reference_control_fid = fopen("reference_control_signals.log", "r");
@@ -379,13 +379,11 @@ int main(void)
 
         // Log to file.
         if (control_and_measurement_parameters.sample_index >= 0) {
-            logSignalSample(log_fid,
+            logSignalSample(&logging,
                             control_and_measurement_parameters.sample_index,
                             timing.diff_ms,
                             current_reflow_oven_signals.oven_temperature_deg_C,
-                            current_reflow_oven_signals.pwm_controller_percent,
-                            first_log_call);
-            first_log_call = 0;
+                            current_reflow_oven_signals.pwm_controller_percent);
         }
 
         // Ready for next sample.
@@ -397,7 +395,7 @@ int main(void)
     }
 
     //--------------------------------------------------
-    fclose(log_fid);
+    fclose(logging.log_fid);
     close(serial_port);
     printf("* Closed the serial port and log file.\n");
     printf("* Finished cleanly -- bye.\n");
