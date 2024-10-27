@@ -92,7 +92,7 @@ typedef struct controller_ {
 } controller;
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
 
     // Determine the OS (macOS or Raspian).
@@ -231,6 +231,15 @@ int main(void)
     // for active waiting.
     control_and_measurement_parameters.sample_index = -1;
     control_and_measurement_parameters.max_runtime_seconds = 720;
+
+    control_and_measurement_parameters.request_to_turn_off = 0;
+    if (argc > 1) {
+        if (strcmp(argv[1], "off") == 0) {
+            control_and_measurement_parameters.request_to_turn_off = 1;
+        }
+    }
+    printf("Request to turn the oven off: %i\n", control_and_measurement_parameters.request_to_turn_off);
+
 
     int ever_exceeded_100_degC = 0;
 

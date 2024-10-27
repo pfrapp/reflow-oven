@@ -42,6 +42,9 @@ typedef struct control_parameters_ {
     // Maximum runtime in seconds.
     int max_runtime_seconds;
 
+    // Request to turn the PWM controller (and hence the oven) off.
+    int request_to_turn_off;
+
 } control_parameters;
 
 //
