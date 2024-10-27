@@ -18,7 +18,7 @@ int logSignalSample(measurement_logging *logging,
     }
 
     if (logging->first_log_call) {
-        fprintf(logging->log_fid, "Index,Time (ms),Oven temperature (C),Ambient temperature (C), PWM controller (percent)\n");
+        fprintf(logging->log_fid, "Index,Time (ms),Oven temperature (C),Ambient temperature (C),PWM controller (percent)\n");
         logging->first_log_call = 0;
     }
 
