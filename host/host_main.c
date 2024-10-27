@@ -171,10 +171,37 @@ int main(int argc, char *argv[])
     ctrl.open_or_closed_loop = open_loop;
     ctrl.pwm_controller_percent = 50.0;
 
+    //
+    // Set up some parameters.
+    //
+
+    // Sample time of 500 ms, corresponding to 2 Hz.
+    control_and_measurement_parameters.sample_time_ms = 500;
+    // Start with -1 in order to allow sample index 0 to already have captured all
+    // the measurement data.
+    // This is necessary because we only receive the first measurement after we
+    // sent the first control signal.
+    // It will still start at time 0 as we are using the sample index
+    // for active waiting.
+    control_and_measurement_parameters.sample_index = -1;
+    control_and_measurement_parameters.max_runtime_seconds = 720;
+
+    control_and_measurement_parameters.request_to_turn_off = 0;
+    if (argc > 1) {
+        if (strcmp(argv[1], "off") == 0) {
+            control_and_measurement_parameters.request_to_turn_off = 1;
+        }
+    }
+    if (control_and_measurement_parameters.request_to_turn_off) {
+        control_and_measurement_parameters.max_runtime_seconds = 1;
+    }
+
 
     // Init logging
-    logging.log_fid = fopen("signals.log", "w");
-    logging.first_log_call = 1;
+    if (!control_and_measurement_parameters.request_to_turn_off) {
+        logging.log_fid = fopen("signals.log", "w");
+        logging.first_log_call = 1;
+    }
 
     // Read the reference and control signals
     reference_control_fid = fopen("reference_control_signals.log", "r");
@@ -220,26 +247,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Capture the time of the start of the actual program logic.
     timing.milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
-    // Sample time of 500 ms, corresponding to 2 Hz.
-    control_and_measurement_parameters.sample_time_ms = 500;
-    // Start with -1 in order to allow sample index 0 to already have captured all
-    // the measurement data.
-    // This is necessary because we only receive the first measurement after we
-    // sent the first control signal.
-    // It will still start at time 0 as we are using the sample index
-    // for active waiting.
-    control_and_measurement_parameters.sample_index = -1;
-    control_and_measurement_parameters.max_runtime_seconds = 720;
-
-    control_and_measurement_parameters.request_to_turn_off = 0;
-    if (argc > 1) {
-        if (strcmp(argv[1], "off") == 0) {
-            control_and_measurement_parameters.request_to_turn_off = 1;
-        }
-    }
-    printf("Request to turn the oven off: %i\n", control_and_measurement_parameters.request_to_turn_off);
-
 
     int ever_exceeded_100_degC = 0;
 
@@ -346,6 +355,9 @@ int main(int argc, char *argv[])
             current_reflow_oven_signals.pwm_controller_percent = 0.0;
         }
 
+        if (control_and_measurement_parameters.request_to_turn_off) {
+            current_reflow_oven_signals.pwm_controller_percent = 0.0;
+        }
 
         // Write to serial port
         usb_packet_to_tiva.pwm_controller = 0.01f * current_reflow_oven_signals.pwm_controller_percent * 0xFFFF;
@@ -391,7 +403,7 @@ int main(int argc, char *argv[])
         printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
 
         // Log to file.
-        if (control_and_measurement_parameters.sample_index >= 0) {
+        if (control_and_measurement_parameters.sample_index >= 0 && !control_and_measurement_parameters.request_to_turn_off) {
             logSignalSample(&logging,
                             &control_and_measurement_parameters,
                             &timing,
@@ -407,7 +419,9 @@ int main(int argc, char *argv[])
     }
 
     //--------------------------------------------------
-    fclose(logging.log_fid);
+    if (!control_and_measurement_parameters.request_to_turn_off) {
+        fclose(logging.log_fid);
+    }
     close(serial_port);
     printf("* Closed the serial port and log file.\n");
     printf("* Finished cleanly -- bye.\n");
