@@ -147,11 +147,8 @@ int main(void)
     int dummy1, dummy2;
     int num_values_read;
 
-    // Milliseconds since epoch at program start.
-    // This means after the time that the connection to the Tiva has been established.
-    long long milliseconds_since_epoch_at_start;
-    long long current_milliseconds_since_epoch;
-    long long diff_ms;
+    // Time keeping
+    time_keeping timing;
 
     // Control (and measurement) parameters.
     control_parameters control_and_measurement_parameters;
@@ -223,7 +220,7 @@ int main(void)
         return 1;
     }
 
-    milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
+    timing.milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
     // Sample time of 500 ms, corresponding to 2 Hz.
     control_and_measurement_parameters.sample_time_ms = 500;
     // Start with -1 in order to allow sample index 0 to already have captured all
@@ -247,9 +244,9 @@ int main(void)
         // Idle (wait) until the sampling interval is over.
         // Perhaps a callback function is more appropriate in the long term.
         do {
-            current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
-            diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
-        } while (diff_ms < control_and_measurement_parameters.sample_index * control_and_measurement_parameters.sample_time_ms);
+            timing.current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
+            timing.diff_ms = timing.current_milliseconds_since_epoch - timing.milliseconds_since_epoch_at_start;
+        } while (timing.diff_ms < control_and_measurement_parameters.sample_index * control_and_measurement_parameters.sample_time_ms);
 
 
 
@@ -328,8 +325,8 @@ int main(void)
             printf("dummy1 = %i, dummy2 = %i\n", dummy1, dummy2);
         }
 
-        current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
-        diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
+        timing.current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
+        timing.diff_ms = timing.current_milliseconds_since_epoch - timing.milliseconds_since_epoch_at_start;
 
         // Disable controller if the temperature was above 100 deg C.
         if (ever_exceeded_100_degC) {
@@ -371,7 +368,7 @@ int main(void)
         }
 
         // Print to terminal
-        time_sec = 0.001f * diff_ms;
+        time_sec = 0.001f * timing.diff_ms;
         printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, control_and_measurement_parameters.max_runtime_seconds);
         printf("Temperature:           % 6.2f C\n", physical_bmp_data.temperature);
         // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
@@ -384,7 +381,7 @@ int main(void)
         if (control_and_measurement_parameters.sample_index >= 0) {
             logSignalSample(log_fid,
                             control_and_measurement_parameters.sample_index,
-                            diff_ms,
+                            timing.diff_ms,
                             current_reflow_oven_signals.oven_temperature_deg_C,
                             current_reflow_oven_signals.pwm_controller_percent,
                             first_log_call);
@@ -394,7 +391,7 @@ int main(void)
         // Ready for next sample.
         control_and_measurement_parameters.sample_index += 1;
 
-        if (diff_ms >= 1000 * control_and_measurement_parameters.max_runtime_seconds) {
+        if (timing.diff_ms >= 1000 * control_and_measurement_parameters.max_runtime_seconds) {
             break;
         }
     }

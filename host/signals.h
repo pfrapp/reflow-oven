@@ -44,6 +44,22 @@ typedef struct control_parameters_ {
 
 } control_parameters;
 
+//
+// Structure used for time keeping.
+//
+typedef struct time_keeping_ {
+    // Milliseconds since epoch at program start.
+    // This means after the time that the connection to the Tiva has been established.
+    long long milliseconds_since_epoch_at_start;
+
+    // The current time in milliseconds since epoch.
+    long long current_milliseconds_since_epoch;
+
+    // Relative time between current time and program start time.
+    long long diff_ms;
+
+} time_keeping;
+
 
 #endif // #ifndef SIGNALS_H
 
