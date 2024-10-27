@@ -197,10 +197,15 @@ int main(int argc, char *argv[])
     }
 
 
-    // Init logging
+    // Init logging and log some general parameters
     if (!control_and_measurement_parameters.request_to_turn_off) {
         logging.log_fid = fopen("signals.log", "w");
         logging.first_log_call = 1;
+
+        // Log some parameters before the actual tabular data begins.
+        // Needs to be skipped when reading the csv file.
+        fprintf(logging.log_fid, "Sample time (ms): %i\n", control_and_measurement_parameters.sample_time_ms);
+        fprintf(logging.log_fid, "Maximum runtime (s): %i\n", control_and_measurement_parameters.max_runtime_seconds);
     }
 
     // Read the reference and control signals
