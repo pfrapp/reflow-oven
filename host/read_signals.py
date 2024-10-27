@@ -9,117 +9,44 @@ import control as ctrl
 
 # %% Define the signals to be read
 
-# 30% PWM signal
-path_prefix = './../measurements/2024-07-27/'
-meas_file = 'signals_step_30_percent.log'
-signal_30 = path_prefix + meas_file
-
-# 50% PWM signal
-path_prefix = './../measurements/2024-07-27/'
-meas_file = 'signals_step_50_percent.log'
-signal_50 = path_prefix + meas_file
-
-# 100% PWM signal with stop after 100 deg C
-path_prefix = './../measurements/2024-08-03/'
+# 100% PWM signal with stop after 100 deg C (October)
+path_prefix = './../measurements/2024-10-27/'
 meas_file = 'signals_step_100_percent_until_100_degC_cooling_down_door_closed.log'
-signal_100_stop = path_prefix + meas_file
+signal_100_deg_C_stop = path_prefix + meas_file
+
+# 100% PWM signal with stop after 200 deg C (October)
+path_prefix = './../measurements/2024-10-27/'
+meas_file = 'signals_step_100_percent_until_200_degC_cooling_down_door_closed.log'
+signal_200_deg_C_stop = path_prefix + meas_file
 
 
 # %% Read and plot the signals
 
-df = pd.read_csv(signal_100_stop)
+df = pd.read_csv(signal_200_deg_C_stop, skiprows=2)
 
 fig = plt.figure(meas_file, figsize=(10,5))
 plt.clf()
 
 ax = fig.add_subplot(1,1,1)
-ax.plot(df['Time (ms)'][1:]/1000, df['Temperature (C)'][1:],
-         linestyle='-', label='Temperature (C)')
-ax.plot(df['Time (ms)'][1:]/1000, df['pwm_controller (percent)'][1:],
+ax.plot(df['Time (ms)']/1000, df['Oven temperature (C)'],
+         linestyle='-', label='Oven temperature (C)')
+ax.plot(df['Time (ms)']/1000, df['Ambient temperature (C)'],
+         linestyle='--', label='Ambient temperature (C)')
+ax.plot(df['Time (ms)']/1000, df['PWM controller (percent)'],
          linestyle='--', label='PWM controller (percent)')
+ax.plot(df['Time (ms)']/1000, df['Thermocouple open']*25,
+         linestyle='--', label='Thermocouple open (x25)')
 ax.grid(True)
 ax.set(ylim=(0, 300))
 ax.set(xlabel='t (ms)')
-# ax.set(ylabel='Temperature (C)')
-ax.set(title='Amplified thermocouple voltage')
+ax.set(title='Measured signals')
 ax.legend()
 
 plt.show()
 
-# %% Offset removal and fitting of PT1
-
-t = df['Time (ms)'] / 1000.0
-theta = df['Temperature (C)']
-# Do not start with 0 due to a non-existing meaningful measurement there.
-theta_0 = np.mean(theta[1:40])
-print(f'theta_0 = {theta_0} deg C')
-
-# Delay of the step function
-step_delay = 30.0
-
-# PWM percentage
-pwm_percent = 100.0
-
-pt1_delay_params = {
-    'lag': 30.0,
-    'amplitude': 250.0/50*pwm_percent,
-    'tau': 320.0
-}
-
-total_lag = step_delay + pt1_delay_params['lag']
-
-def exp_fit(t, lag, amp, tau):
-    y = amp*(1-np.exp(-(t-lag)/tau))
-    y[t < lag] = 0.0
-    return y
-
-fig = plt.figure(meas_file, figsize=(7,12))
-plt.clf()
-
-ax = fig.add_subplot(3,1,1)
-ax.plot(t, theta - theta_0, linestyle='-')
-# Note that the step comes after 30 seconds, so the process lag is 30 seconds.
-ax.plot(t, exp_fit(t, total_lag, pt1_delay_params['amplitude'], pt1_delay_params['tau']), linestyle='--')
-# Tangente
-tang = pt1_delay_params['amplitude']*(t-total_lag)/pt1_delay_params['tau']
-ax.plot(t, tang, linestyle='--')
-ax.grid(True)
-# ax.set(xlim=(-10,30))
-# ax.set(ylim=(-10, 10))
-ax.set(xlim=(-20,800))
-ax.set(ylim=(-10, 200))
-ax.set(xlabel='t (s)')
-ax.set(ylabel='Temperature minus start temperature (C)')
-ax.set(title='Amplified thermocouple voltage')
-
-plt.show()
 
 
-# %% Simulation via plant model
-
-# tf_pt1 = ctrl.tf([505.0], [320.0, 1.0]) # 50% pwm
-tf_pt1 = ctrl.tf([550.0], [370.0, 1.0]) # 30% pwm
-num, den = ctrl.pade(40, 5)
-tf_Td = ctrl.tf(num, den)
-G = ctrl.series(tf_Td, tf_pt1)
-
-fig = plt.figure('simulation', figsize=(7,12))
-plt.clf()
-ax = fig.add_subplot(3,1,1)
-
-t_step, h_step = ctrl.step_response(0.01*pwm_percent*G)
-# The step in the measurement comes after 30 seconds
-t_step += 30.0
-ax.plot(t_step, h_step, linestyle='--', label='Simulation')
-ax.plot(t[1:], theta[1:] - theta_0, linestyle='-', label='Measurement')
-ax.set(xlim=(0,1500))
-# plt.xlim(0,300)
-# plt.ylim(-10,300)
-ax.grid(True)
-
-plt.show()
-
-# %% Use the actual input signal
+# %% Simulation via plant model using the actual input signal
 
 # Model fitted to the 100% PWM step that turns off once 100 deg C are reached.
 tf_pt1_a = ctrl.tf([6.7], [30.0, 1.0])
@@ -133,16 +60,12 @@ G = ctrl.series(tf_Td, tf_pt1_a, tf_pt1_b)
 # t = t.to_numpy()
 # Make sure t is equally spaced
 t = np.arange(0,2*720+1)*0.5
-t = t[1:]
 
-theta = df['Temperature (C)'].to_numpy()
-# Do not start with 0 due to a non-existing meaningful measurement there.
-theta = theta[1:]
+theta = df['Oven temperature (C)'].to_numpy()
 theta_0 = np.mean(theta[:40])
 print(f'theta_0 = {theta_0} deg C')
 
-u = df['pwm_controller (percent)'].to_numpy()
-u = u[1:]
+u = df['PWM controller (percent)'].to_numpy()
 
 time_response = ctrl.forced_response(G, t, u, 0.0)
 
@@ -158,8 +81,11 @@ ax.grid(True)
 
 plt.show()
 
-# %% Validate the model
 
+
+#
+# The following sections/lines are not yet updated!
+#
 
 # %% Ziegler-Nichols
 
