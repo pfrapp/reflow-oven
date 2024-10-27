@@ -293,7 +293,8 @@ int main(void)
 
         // Digital thermocouple value
         digital_thermocouple = usb_packet_from_tiva.digital_amp_thermocouple & 0x0000FFFF;
-        if (digital_thermocouple & 0x0004) {
+        current_reflow_oven_signals.thermocouple_is_open = digital_thermocouple & 0x0004;
+        if (current_reflow_oven_signals.thermocouple_is_open) {
             printf("Digital thermocouple is open\n");
             // printf("You will not receive any measurements -- Exiting!\n");
             // return -1;
@@ -301,9 +302,10 @@ int main(void)
             // printf("Digital thermocouple is closed\n");
         }
         ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
+        current_reflow_oven_signals.oven_temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
 
         // Check if we ever exceeded 100 deg C.
-        if (ctrl.temperature_deg_C > 100.0) {
+        if (current_reflow_oven_signals.oven_temperature_deg_C > 100.0) {
             ever_exceeded_100_degC = 1;
         }
 
@@ -325,12 +327,12 @@ int main(void)
 
         // Disable controller if the temperature was above 100 deg C.
         if (ever_exceeded_100_degC) {
-            ctrl.pwm_controller_percent = 0.0;
+            current_reflow_oven_signals.pwm_controller_percent = 0.0;
         }
 
 
         // Write to serial port
-        usb_packet_to_tiva.pwm_controller = 0.01f * ctrl.pwm_controller_percent * 0xFFFF;
+        usb_packet_to_tiva.pwm_controller = 0.01f * current_reflow_oven_signals.pwm_controller_percent * 0xFFFF;
         usb_packet_to_tiva.status = 0;
         write(serial_port, &usb_packet_to_tiva, sizeof(usb_packet_to_tiva));
 
@@ -368,12 +370,17 @@ int main(void)
         printf("Temperature:           % 6.2f C\n", physical_bmp_data.temperature);
         // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
         // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
-        printf("Measured temperature:  %6.2f deg C\n", ctrl.temperature_deg_C);
+        printf("Measured temperature:  %6.2f deg C\n", current_reflow_oven_signals.oven_temperature_deg_C);
         printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
-        printf("PWM controller signal: %6.2f %%\n", ctrl.pwm_controller_percent);
+        printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
 
         // Log to file.
-        logSignalSample(log_fid, control_and_measurement_parameters.sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
+        logSignalSample(log_fid,
+                        control_and_measurement_parameters.sample_index,
+                        diff_ms,
+                        current_reflow_oven_signals.oven_temperature_deg_C,
+                        current_reflow_oven_signals.pwm_controller_percent,
+                        first_log_call);
         first_log_call = 0;
 
         // Ready for next sample.
