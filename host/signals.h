@@ -29,5 +29,21 @@ typedef struct reflow_oven_signals_ {
 
 } reflow_oven_signals;
 
+//
+// Overall control parameters.
+//
+typedef struct control_parameters_ {
+    // Current sample index.
+    int index;
+
+    // Sample time in ms.
+    int sample_time_ms;
+
+    // Maximum runtime in seconds.
+    int max_runtime_seconds;
+
+} control_parameters;
+
+
 #endif // #ifndef SIGNALS_H
 
