@@ -16,13 +16,13 @@ typedef struct reflow_oven_signals_ {
     int relative_timestamp_ms;
 
     // The control signal u_pwm (in percent, from 0.0 to 100.0).
-    float pwm_controller_percent;
+    double pwm_controller_percent;
 
     // The measured oven temperature theta_o in degree Celcius.
-    float oven_temperature_deg_C;
+    double oven_temperature_deg_C;
 
     // The measured ambient temperature theta_o in degree Celcius.
-    float ambient_temperature_deg_C;
+    double ambient_temperature_deg_C;
 
     // Indicator whether the thermocouple is open (1) or closed (0).
     int thermocouple_is_open;
