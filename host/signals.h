@@ -63,6 +63,24 @@ typedef struct time_keeping_ {
 
 } time_keeping;
 
+//
+// Structure used for system identification.
+//
+typedef struct system_identification_ {
+    // Start of the procedure in seconds.
+    double start_time_seconds;
+
+    // Temperature after which we stop heating in degree C.
+    double heating_until_deg_C;
+
+    // Overall time in seconds.
+    int max_runtime_seconds;
+
+    // Internal state denoting whether we already reached / ever exceeded the maximum heating temperature.
+    int maximum_heating_temperature_ever_exceeded;
+
+} system_identification;
+
 
 #endif // #ifndef SIGNALS_H
 

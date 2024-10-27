@@ -171,9 +171,16 @@ int main(int argc, char *argv[])
     ctrl.open_or_closed_loop = open_loop;
     ctrl.pwm_controller_percent = 50.0;
 
+    // System identification data structure.
+    system_identification sys_ident;
+
     //
     // Set up some parameters.
     //
+    sys_ident.start_time_seconds = 10.0; // 30
+    sys_ident.heating_until_deg_C = 25.0; // 100
+    sys_ident.max_runtime_seconds = 50; // 720
+    sys_ident.maximum_heating_temperature_ever_exceeded = 0;
 
     // Sample time of 500 ms, corresponding to 2 Hz.
     control_and_measurement_parameters.sample_time_ms = 500;
@@ -184,7 +191,7 @@ int main(int argc, char *argv[])
     // It will still start at time 0 as we are using the sample index
     // for active waiting.
     control_and_measurement_parameters.sample_index = -1;
-    control_and_measurement_parameters.max_runtime_seconds = 720;
+    control_and_measurement_parameters.max_runtime_seconds = sys_ident.max_runtime_seconds;
 
     control_and_measurement_parameters.request_to_turn_off = 0;
     if (argc > 1) {
@@ -254,8 +261,6 @@ int main(int argc, char *argv[])
 
     // Capture the time of the start of the actual program logic.
     timing.milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
-
-    int ever_exceeded_100_degC = 0;
 
     while (1)
     {
@@ -330,9 +335,9 @@ int main(int argc, char *argv[])
         ctrl.temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
         current_reflow_oven_signals.oven_temperature_deg_C = (digital_thermocouple >> 3) * 0.25f;
 
-        // Check if we ever exceeded 100 deg C.
-        if (current_reflow_oven_signals.oven_temperature_deg_C > 100.0) {
-            ever_exceeded_100_degC = 1;
+        // Check if we ever exceeded the defined temperature.
+        if (current_reflow_oven_signals.oven_temperature_deg_C > sys_ident.heating_until_deg_C) {
+            sys_ident.maximum_heating_temperature_ever_exceeded = 1;
         }
 
         // Fill sample index and ambient temperature values into the current measurement sample.
@@ -355,8 +360,13 @@ int main(int argc, char *argv[])
         timing.current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         timing.diff_ms = timing.current_milliseconds_since_epoch - timing.milliseconds_since_epoch_at_start;
 
-        // Disable controller if the temperature was above 100 deg C.
-        if (ever_exceeded_100_degC) {
+        if (timing.diff_ms / 1000.0 < sys_ident.start_time_seconds) {
+            current_reflow_oven_signals.pwm_controller_percent = 0.0;
+        } else {
+            current_reflow_oven_signals.pwm_controller_percent = 100.0;
+        }
+        // Disable controller if the temperature was above the defined limit.
+        if (sys_ident.maximum_heating_temperature_ever_exceeded) {
             current_reflow_oven_signals.pwm_controller_percent = 0.0;
         }
 
