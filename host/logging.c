@@ -18,17 +18,18 @@ int logSignalSample(measurement_logging *logging,
     }
 
     if (logging->first_log_call) {
-        fprintf(logging->log_fid, "Index,Time (ms),Oven temperature (C),Ambient temperature (C),PWM controller (percent)\n");
+        fprintf(logging->log_fid, "Index,Time (ms),Oven temperature (C),Ambient temperature (C),PWM controller (percent),Thermocouple open\n");
         logging->first_log_call = 0;
     }
 
     //
-    fprintf(logging->log_fid, "%05i,%09i,%06.2f,%05.2f,%06.2f\n",
+    fprintf(logging->log_fid, "%05i,%09i,%06.2f,%05.2f,%06.2f,%1i\n",
             oven_signals->index,
             time_params->diff_ms,
             oven_signals->oven_temperature_deg_C,
             oven_signals->ambient_temperature_deg_C,
-            oven_signals->pwm_controller_percent);
+            oven_signals->pwm_controller_percent,
+            oven_signals->thermocouple_is_open);
 
     return 0;
 }

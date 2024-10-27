@@ -394,12 +394,14 @@ int main(int argc, char *argv[])
 
         // Print to terminal
         time_sec = 0.001f * timing.diff_ms;
-        printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, control_and_measurement_parameters.max_runtime_seconds);
-        printf("Temperature:           % 6.2f C\n", physical_bmp_data.temperature);
+        printf("------------------------------------------------------------------\n"
+               "Time:                 % 8.3f s (of %i s)\n", time_sec, control_and_measurement_parameters.max_runtime_seconds);
+        printf("Ambient temperature:   % 6.2f C\n", physical_bmp_data.temperature);
         // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
         // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
-        printf("Measured temperature:  %6.2f deg C\n", current_reflow_oven_signals.oven_temperature_deg_C);
-        printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
+        printf("Oven temperature:      %6.2f deg C", current_reflow_oven_signals.oven_temperature_deg_C);
+        printf(" (thermocouple is %s)\n", current_reflow_oven_signals.thermocouple_is_open ? "open" : "closed");
+        // printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
         printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
 
         // Log to file.
