@@ -30,6 +30,7 @@
 #include "timing.h"
 #include "usb_serial.h"
 #include "bmp.h"
+#include "signals.h"
 
 // Currently supported platforms
 enum {
@@ -151,9 +152,9 @@ int main(void)
     long long milliseconds_since_epoch_at_start;
     long long current_milliseconds_since_epoch;
     long long diff_ms;
-    int sample_index;
-    int sample_time_ms;
-    int max_runtime_seconds;
+
+    // Control (and measurement) parameters.
+    control_parameters control_and_measurement_parameters;
 
     // File for logging measurement signals to and reading the reference
     // and control signals from.
@@ -164,6 +165,9 @@ int main(void)
     struct bmp2_dev bmp_device;
     struct bmp2_uncomp_data raw_bmp_data;
     struct bmp2_data physical_bmp_data;
+
+    // Keep track of the signals associated with the reflow oven.
+    reflow_oven_signals current_reflow_oven_signals;
 
     // Controller data
     controller ctrl;
@@ -221,9 +225,9 @@ int main(void)
 
     milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
     // Sample time of 500 ms, corresponding to 2 Hz.
-    sample_time_ms = 500;
-    sample_index = 0;
-    max_runtime_seconds = 720;
+    control_and_measurement_parameters.sample_time_ms = 500;
+    control_and_measurement_parameters.sample_index = 0;
+    control_and_measurement_parameters.max_runtime_seconds = 720;
 
     int ever_exceeded_100_degC = 0;
 
@@ -239,7 +243,7 @@ int main(void)
         do {
             current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
             diff_ms = current_milliseconds_since_epoch - milliseconds_since_epoch_at_start;
-        } while (diff_ms < sample_index*sample_time_ms);
+        } while (diff_ms < control_and_measurement_parameters.sample_index * control_and_measurement_parameters.sample_time_ms);
 
 
 
@@ -360,7 +364,7 @@ int main(void)
 
         // Print to terminal
         time_sec = 0.001f * diff_ms;
-        printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, max_runtime_seconds);
+        printf("---------------------------------------\nTime:                 % 8.3f s (of %i s)\n", time_sec, control_and_measurement_parameters.max_runtime_seconds);
         printf("Temperature:           % 6.2f C\n", physical_bmp_data.temperature);
         // printf("Pressure:             % 8.2f Pa\n", physical_bmp_data.pressure);
         // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
@@ -369,13 +373,13 @@ int main(void)
         printf("PWM controller signal: %6.2f %%\n", ctrl.pwm_controller_percent);
 
         // Log to file.
-        logSignalSample(log_fid, sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
+        logSignalSample(log_fid, control_and_measurement_parameters.sample_index, diff_ms, ctrl.temperature_deg_C, ctrl.pwm_controller_percent, first_log_call);
         first_log_call = 0;
 
         // Ready for next sample.
-        sample_index += 1;
+        control_and_measurement_parameters.sample_index += 1;
 
-        if (diff_ms >= 1000 * max_runtime_seconds) {
+        if (diff_ms >= 1000 * control_and_measurement_parameters.max_runtime_seconds) {
             break;
         }
     }

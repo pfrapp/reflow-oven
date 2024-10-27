@@ -34,7 +34,7 @@ typedef struct reflow_oven_signals_ {
 //
 typedef struct control_parameters_ {
     // Current sample index.
-    int index;
+    int sample_index;
 
     // Sample time in ms.
     int sample_time_ms;
