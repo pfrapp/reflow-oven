@@ -226,7 +226,13 @@ int main(void)
     milliseconds_since_epoch_at_start = getMilliSecondsSinceEpoch();
     // Sample time of 500 ms, corresponding to 2 Hz.
     control_and_measurement_parameters.sample_time_ms = 500;
-    control_and_measurement_parameters.sample_index = 0;
+    // Start with -1 in order to allow sample index 0 to already have captured all
+    // the measurement data.
+    // This is necessary because we only receive the first measurement after we
+    // sent the first control signal.
+    // It will still start at time 0 as we are using the sample index
+    // for active waiting.
+    control_and_measurement_parameters.sample_index = -1;
     control_and_measurement_parameters.max_runtime_seconds = 720;
 
     int ever_exceeded_100_degC = 0;
@@ -375,13 +381,15 @@ int main(void)
         printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
 
         // Log to file.
-        logSignalSample(log_fid,
-                        control_and_measurement_parameters.sample_index,
-                        diff_ms,
-                        current_reflow_oven_signals.oven_temperature_deg_C,
-                        current_reflow_oven_signals.pwm_controller_percent,
-                        first_log_call);
-        first_log_call = 0;
+        if (control_and_measurement_parameters.sample_index >= 0) {
+            logSignalSample(log_fid,
+                            control_and_measurement_parameters.sample_index,
+                            diff_ms,
+                            current_reflow_oven_signals.oven_temperature_deg_C,
+                            current_reflow_oven_signals.pwm_controller_percent,
+                            first_log_call);
+            first_log_call = 0;
+        }
 
         // Ready for next sample.
         control_and_measurement_parameters.sample_index += 1;
