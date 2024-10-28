@@ -491,6 +491,9 @@ int main(int argc, char *argv[])
         printf(" (thermocouple is %s)\n", current_reflow_oven_signals.thermocouple_is_open ? "open" : "closed");
         printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
         printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
+        if (time_sec > 570.0) {
+            printf("Please open the door now!\n");
+        }
 
         // Log to file.
         if (control_and_measurement_parameters.sample_index >= 0 && !control_and_measurement_parameters.request_to_turn_off) {
