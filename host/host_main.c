@@ -31,12 +31,20 @@
 #include "usb_serial.h"
 #include "bmp.h"
 #include "signals.h"
+#include "solder_profile.h"
 
 // Currently supported platforms
 enum {
     platform_mac = 0,    // macOS
     platform_rpi = 1,     // Raspberry Pi running Raspian
     platform_invalid = 2
+};
+
+// Current mode
+enum {
+    operation_mode_turn_off = 0,            // just turn the PWM off
+    operation_mode_system_identification,   // excert a step function for system identification
+    operation_mode_control                  // run the controller to follow the reflow temperature profile
 };
 
 int get_platform() {
@@ -83,11 +91,24 @@ typedef struct controller_ {
     // Control error in degree Celcius.
     double control_error_deg_C;
 
-    // Integrated control error (in degree Celcius times seoncs)
+    // Integrated control error (in degree Celcius times seconds).
+    // This is the first state variable.
     double integrated_control_error_deg_C_sec;
+
+    // Control error from the last cycle.
+    // This is the second state variable.
+    double previous_control_error_deg_C;
+
+    // Differentiated control error (in degree Celcius per second)
+    double differentiated_control_error_deg_C_per_sec;
 
     // Open or closed loop control.
     int open_or_closed_loop;
+
+    // Controller parameters.
+    double kP;
+    double kI;
+    double kD;
 
 } controller;
 
@@ -170,16 +191,25 @@ int main(int argc, char *argv[])
     controller ctrl;
     ctrl.open_or_closed_loop = open_loop;
     ctrl.pwm_controller_percent = 50.0;
+    ctrl.previous_control_error_deg_C = 0.0;
+    ctrl.integrated_control_error_deg_C_sec = 0.0;
+    ctrl.kP = 3.0;
+    ctrl.kI = 0.0200;
+    ctrl.kD = 20.0;
+    // todo: init the remaining variables
 
     // System identification data structure.
     system_identification sys_ident;
+
+    // Operation mode
+    int operation_mode = operation_mode_control;
 
     //
     // Set up some parameters.
     //
     sys_ident.start_time_seconds = 10.0; // 30
     sys_ident.heating_until_deg_C = 25.0; // 100
-    sys_ident.max_runtime_seconds = 50; // 720
+    sys_ident.max_runtime_seconds = 720; // 720
     sys_ident.maximum_heating_temperature_ever_exceeded = 0;
 
     // Sample time of 500 ms, corresponding to 2 Hz.
@@ -197,6 +227,7 @@ int main(int argc, char *argv[])
     if (argc > 1) {
         if (strcmp(argv[1], "off") == 0) {
             control_and_measurement_parameters.request_to_turn_off = 1;
+            operation_mode = operation_mode_turn_off;
         }
     }
     if (control_and_measurement_parameters.request_to_turn_off) {
@@ -360,18 +391,60 @@ int main(int argc, char *argv[])
         timing.current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         timing.diff_ms = timing.current_milliseconds_since_epoch - timing.milliseconds_since_epoch_at_start;
 
-        if (timing.diff_ms / 1000.0 < sys_ident.start_time_seconds) {
-            current_reflow_oven_signals.pwm_controller_percent = 0.0;
-        } else {
-            current_reflow_oven_signals.pwm_controller_percent = 100.0;
-        }
-        // Disable controller if the temperature was above the defined limit.
-        if (sys_ident.maximum_heating_temperature_ever_exceeded) {
-            current_reflow_oven_signals.pwm_controller_percent = 0.0;
-        }
+        //
+        // Compute the control signal
+        //
 
-        if (control_and_measurement_parameters.request_to_turn_off) {
-            current_reflow_oven_signals.pwm_controller_percent = 0.0;
+        switch(operation_mode) {
+            case operation_mode_turn_off:
+                if (control_and_measurement_parameters.request_to_turn_off) {
+                    current_reflow_oven_signals.pwm_controller_percent = 0.0;
+                }
+                break;
+
+            case operation_mode_system_identification:
+                if (timing.diff_ms / 1000.0 < sys_ident.start_time_seconds) {
+                    current_reflow_oven_signals.pwm_controller_percent = 0.0;
+                } else {
+                    current_reflow_oven_signals.pwm_controller_percent = 100.0;
+                }
+                // Disable controller if the temperature was above the defined limit.
+                if (sys_ident.maximum_heating_temperature_ever_exceeded) {
+                    current_reflow_oven_signals.pwm_controller_percent = 0.0;
+                }
+                break;
+
+            case operation_mode_control:
+                // controller update function
+                // controller output function
+                // current_reflow_oven_signals.pwm_controller_percent = ...
+                ctrl.reference_deg_C = 0.0;
+                if (current_reflow_oven_signals.index >= 0) {
+                    ctrl.reference_deg_C = g_solder_profile[current_reflow_oven_signals.index];
+                }
+                ctrl.control_error_deg_C = ctrl.reference_deg_C - current_reflow_oven_signals.oven_temperature_deg_C;
+                ctrl.integrated_control_error_deg_C_sec +=
+                        control_and_measurement_parameters.sample_time_ms * 1.0e-3 * ctrl.control_error_deg_C;
+                ctrl.differentiated_control_error_deg_C_per_sec =
+                    (ctrl.control_error_deg_C - ctrl.previous_control_error_deg_C) /
+                        (control_and_measurement_parameters.sample_time_ms * 1.0e-3);
+                ctrl.pwm_controller_percent = 
+                        ctrl.kP * ctrl.control_error_deg_C
+                        + ctrl.kI * ctrl.integrated_control_error_deg_C_sec
+                        + ctrl.kD * ctrl.differentiated_control_error_deg_C_per_sec;
+                ctrl.previous_control_error_deg_C = ctrl.control_error_deg_C;
+
+                // Limit values
+                if (ctrl.pwm_controller_percent < 0.0) {
+                    ctrl.pwm_controller_percent = 0.0;
+                }
+                if (ctrl.pwm_controller_percent > 100.0) {
+                    ctrl.pwm_controller_percent = 100.0;
+                }
+
+                // Take over computed controller PWM value
+                current_reflow_oven_signals.pwm_controller_percent = ctrl.pwm_controller_percent;
+                break;
         }
 
         // Write to serial port
@@ -416,7 +489,7 @@ int main(int argc, char *argv[])
         // printf("Thermocouple voltage: % 7.4f V\n", thermocouple_voltage);
         printf("Oven temperature:      %6.2f deg C", current_reflow_oven_signals.oven_temperature_deg_C);
         printf(" (thermocouple is %s)\n", current_reflow_oven_signals.thermocouple_is_open ? "open" : "closed");
-        // printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
+        printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
         printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
 
         // Log to file.
