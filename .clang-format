@@ -1,0 +1,4 @@
+BasedOnStyle: Mozilla
+IndentWidth: 4
+ContinuationIndentWidth: 4
+AlignConsecutiveAssignments: true
