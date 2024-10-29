@@ -245,3 +245,9 @@ The parameters of this PI controller are parameterized by the Ziegler-Nichols me
 See also the following block diagram overview.
 
 ![Block diagram overview](blockdiagram_overview.png)
+
+## General todos
+
+- Update resistors (1k, not 3.9k, 2 times) on the Tiva board
+- Add note to add LED signaling open thermocouple
+- Add note to add LED signaling request to open door (manually)
