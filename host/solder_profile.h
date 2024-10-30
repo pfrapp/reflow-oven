@@ -1,6 +1,8 @@
 #ifndef SOLDER_PROFILE_H
 #define SOLDER_PROFILE_H
 
+const int g_solder_profile_length = 1441;
+
 const double g_solder_profile[] = { 50.0,
                                     50.0,
                                     50.0,
@@ -1443,4 +1445,4 @@ const double g_solder_profile[] = { 50.0,
                                     50.0,
                                     50.0 };
 
-#endif // #ifndef SOLDER_PROFILE_H
+#endif    // #ifndef SOLDER_PROFILE_H
