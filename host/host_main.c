@@ -115,6 +115,9 @@ typedef struct controller_ {
     // Open or closed loop control.
     int open_or_closed_loop;
 
+    // Overall time in seconds.
+    int max_runtime_seconds;
+
     // Controller parameters.
     double kP;
     double kI;
@@ -199,14 +202,18 @@ int main(int argc, char *argv[])
 
     // Controller data
     controller ctrl;
-    ctrl.open_or_closed_loop = open_loop;
-    ctrl.pwm_controller_percent = 50.0;
-    ctrl.previous_control_error_deg_C = 0.0;
-    ctrl.integrated_control_error_deg_C_sec = 0.0;
-    ctrl.kP = 3.0;
-    ctrl.kI = 0.0200;
-    ctrl.kD = 20.0;
-    // todo: init the remaining variables
+    ctrl.pwm_controller_percent                     = 0.0;
+    ctrl.reference_deg_C                            = 0.0;
+    ctrl.temperature_deg_C                          = 0.0;
+    ctrl.control_error_deg_C                        = 0.0;
+    ctrl.integrated_control_error_deg_C_sec         = 0.0;
+    ctrl.previous_control_error_deg_C               = 0.0;
+    ctrl.differentiated_control_error_deg_C_per_sec = 0.0;
+    ctrl.open_or_closed_loop                        = open_loop;
+    ctrl.max_runtime_seconds                        = 720;
+    ctrl.kP                                         = 3.0;
+    ctrl.kI                                         = 0.0200;
+    ctrl.kD                                         = 20.0;
 
     // System identification data structure.
     system_identification sys_ident;
