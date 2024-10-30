@@ -460,12 +460,18 @@ int main(int argc, char *argv[])
                 break;
 
             case operation_mode_control:
+            case operation_mode_test:
                 // controller update function
                 // controller output function
-                // current_reflow_oven_signals.pwm_controller_percent = ...
                 ctrl.reference_deg_C = 0.0;
                 if (current_reflow_oven_signals.index >= 0) {
-                    ctrl.reference_deg_C = g_solder_profile[current_reflow_oven_signals.index];
+                    // Take over the value from the precomputed arrays.
+                    if (operation_mode == operation_mode_control) {
+                        ctrl.reference_deg_C = g_solder_profile[current_reflow_oven_signals.index];
+                    } else if (operation_mode == operation_mode_test) {
+                        ctrl.reference_deg_C =
+                            g_solder_test_profile[current_reflow_oven_signals.index];
+                    }
                 }
                 ctrl.control_error_deg_C = ctrl.reference_deg_C - current_reflow_oven_signals.oven_temperature_deg_C;
                 ctrl.integrated_control_error_deg_C_sec +=
