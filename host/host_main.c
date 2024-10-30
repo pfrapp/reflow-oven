@@ -78,14 +78,6 @@ enum {
     closed_loop
 };
 
-// The reference and control signals are saved in a file.
-//
-// Note: In closed-loop operation, the reference signal
-// is used and the control signal is computed.
-//
-// In open-loop operation, the control signal from the file
-// is used and the reference signal is discarded.
-
 // Structure and functions to hold information about the controller.
 // Put to separate file if needed.
 typedef struct controller_ {
@@ -184,9 +176,7 @@ int main(int argc, char *argv[])
     // Control (and measurement) parameters.
     control_parameters control_and_measurement_parameters;
 
-    // File for logging measurement signals to and reading the reference
-    // and control signals from.
-    FILE *reference_control_fid;
+    // Measurement logging.
     measurement_logging logging;
 
     // BMP structures
@@ -286,13 +276,6 @@ int main(int argc, char *argv[])
         fprintf(logging.log_fid, "Sample time (ms): %i\n", control_and_measurement_parameters.sample_time_ms);
         fprintf(logging.log_fid, "Maximum runtime (s): %i\n", control_and_measurement_parameters.max_runtime_seconds);
     }
-
-    // Read the reference and control signals
-    reference_control_fid = fopen("reference_control_signals.log", "r");
-    // Skip the first line, see
-    // https://stackoverflow.com/questions/2799612/how-to-skip-a-line-when-fscanning-a-text-file
-    fscanf(reference_control_fid, "%*[^\n]\n");
-
 
     printf("*\n");
     printf("* Connecting to the Tiva device via the virtual COM port.\n");
@@ -415,19 +398,6 @@ int main(int argc, char *argv[])
         // Fill sample index and ambient temperature values into the current measurement sample.
         current_reflow_oven_signals.index = control_and_measurement_parameters.sample_index;
         current_reflow_oven_signals.ambient_temperature_deg_C = physical_bmp_data.temperature;
-
-
-        // Read the reference and control signals from file.
-        num_values_read = fscanf(reference_control_fid, "%d,%d,%lf,%lf",
-                &dummy1, &dummy2,
-                &(ctrl.reference_deg_C),
-                &(ctrl.pwm_controller_percent));
-        if (num_values_read == 4) {
-            // printf("ref %f, ctrl %f\n", ctrl.reference_deg_C, ctrl.pwm_controller_percent);
-        } else {
-            printf("Failed to read reference and control signals (num_values_read = %i)!\n", num_values_read);
-            printf("dummy1 = %i, dummy2 = %i\n", dummy1, dummy2);
-        }
 
         timing.current_milliseconds_since_epoch = getMilliSecondsSinceEpoch();
         timing.diff_ms = timing.current_milliseconds_since_epoch - timing.milliseconds_since_epoch_at_start;
