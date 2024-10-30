@@ -1445,4 +1445,9 @@ const double g_solder_profile[] = { 50.0,
                                     50.0,
                                     50.0 };
 
+const int g_solder_test_profile_length = 11;
+
+const double g_solder_test_profile[] = { 30.0,  65.0, 100.0, 125.0, 150.0, 125.0,
+                                         100.0, 75.0, 50.0,  40.0,  30.0 };
+
 #endif    // #ifndef SOLDER_PROFILE_H
