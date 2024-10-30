@@ -78,43 +78,6 @@ enum {
     closed_loop
 };
 
-// Structure and functions to hold information about the controller.
-// Put to separate file if needed.
-typedef struct controller_ {
-    // The control signal (in percent, from 0.0 to 100.0).
-    double pwm_controller_percent;
-
-    // The reference signal in degree Celcius.
-    double reference_deg_C;
-
-    // Measured temperature in degree Celcius.
-    double temperature_deg_C;
-
-    // Control error in degree Celcius.
-    double control_error_deg_C;
-
-    // Integrated control error (in degree Celcius times seconds).
-    // This is the first state variable.
-    double integrated_control_error_deg_C_sec;
-
-    // Control error from the last cycle.
-    // This is the second state variable.
-    double previous_control_error_deg_C;
-
-    // Differentiated control error (in degree Celcius per second)
-    double differentiated_control_error_deg_C_per_sec;
-
-    // Overall time in seconds.
-    int max_runtime_seconds;
-
-    // Controller parameters.
-    double kP;
-    double kI;
-    double kD;
-
-} controller;
-
-
 int main(int argc, char *argv[])
 {
 
