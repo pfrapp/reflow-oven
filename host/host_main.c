@@ -112,9 +112,6 @@ typedef struct controller_ {
     // Differentiated control error (in degree Celcius per second)
     double differentiated_control_error_deg_C_per_sec;
 
-    // Open or closed loop control.
-    int open_or_closed_loop;
-
     // Overall time in seconds.
     int max_runtime_seconds;
 
@@ -209,7 +206,6 @@ int main(int argc, char *argv[])
     ctrl.integrated_control_error_deg_C_sec         = 0.0;
     ctrl.previous_control_error_deg_C               = 0.0;
     ctrl.differentiated_control_error_deg_C_per_sec = 0.0;
-    ctrl.open_or_closed_loop                        = open_loop;
     ctrl.max_runtime_seconds                        = 720;
     ctrl.kP                                         = 3.0;
     ctrl.kI                                         = 0.0200;
