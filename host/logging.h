@@ -15,10 +15,11 @@ typedef struct measurement_logging_ {
 
 } measurement_logging;
 
-
-int logSignalSample(measurement_logging *logging,
-                    control_parameters *control_params,
-                    time_keeping *time_params,
-                    reflow_oven_signals *oven_signals);
+int
+logSignalSample(measurement_logging* logging,
+                control_parameters* control_params,
+                time_keeping* time_params,
+                reflow_oven_signals* oven_signals,
+                controller* ctrl);
 
 #endif // #ifndef LOGGING_H

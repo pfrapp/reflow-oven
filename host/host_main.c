@@ -480,7 +480,8 @@ int main(int argc, char *argv[])
             logSignalSample(&logging,
                             &control_and_measurement_parameters,
                             &timing,
-                            &current_reflow_oven_signals);
+                            &current_reflow_oven_signals,
+                            &ctrl);
         }
 
         // Ready for next sample.
