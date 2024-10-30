@@ -41,10 +41,20 @@ enum {
 };
 
 // Current mode
-enum {
-    operation_mode_turn_off = 0,            // just turn the PWM off
-    operation_mode_system_identification,   // excert a step function for system identification
-    operation_mode_control                  // run the controller to follow the reflow temperature profile
+enum
+{
+    operation_mode_turn_off = 0,             // Just turn the PWM off.
+
+    operation_mode_system_identification,    // Excert a step function for system identification.
+
+    operation_mode_control,                  // Run the controller to follow
+                                             // the reflow temperature profile.
+
+    operation_mode_test,                     // Short solder run: follow a 5 second profile
+                                             // which should not actually
+                                             // heat up the ofen that much.
+
+    operation_mode_invalid                   // Invalid operation mode.
 };
 
 int get_platform() {
@@ -201,8 +211,8 @@ int main(int argc, char *argv[])
     // System identification data structure.
     system_identification sys_ident;
 
-    // Operation mode
-    int operation_mode = operation_mode_control;
+    // Operation mode (defaults to invalid)
+    int operation_mode = operation_mode_invalid;
 
     //
     // Set up some parameters.
@@ -224,11 +234,25 @@ int main(int argc, char *argv[])
     control_and_measurement_parameters.max_runtime_seconds = sys_ident.max_runtime_seconds;
 
     control_and_measurement_parameters.request_to_turn_off = 0;
+
+    // Retrieve the desired operation mode.
     if (argc > 1) {
         if (strcmp(argv[1], "off") == 0) {
             control_and_measurement_parameters.request_to_turn_off = 1;
-            operation_mode = operation_mode_turn_off;
+            operation_mode                                         = operation_mode_turn_off;
+        } else if (strcmp(argv[1], "sysident") == 0) {
+            operation_mode = operation_mode_system_identification;
+        } else if (strcmp(argv[1], "solder") == 0) {
+            operation_mode = operation_mode_control;
+        } else if (strcmp(argv[1], "test") == 0) {
+            operation_mode = operation_mode_test;
         }
+    }
+    if (operation_mode == operation_mode_invalid) {
+        printf("## No or invalid operation mode provided as first argument.\n"
+               "## Valid operation modes are: off, sysident, solder, and test.\n"
+               "## Exiting (with return code -1).\n");
+        return -1;
     }
     if (control_and_measurement_parameters.request_to_turn_off) {
         control_and_measurement_parameters.max_runtime_seconds = 1;
