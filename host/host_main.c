@@ -238,7 +238,6 @@ int main(int argc, char *argv[])
     // It will still start at time 0 as we are using the sample index
     // for active waiting.
     control_and_measurement_parameters.sample_index = -1;
-    control_and_measurement_parameters.max_runtime_seconds = sys_ident.max_runtime_seconds;
 
     control_and_measurement_parameters.request_to_turn_off = 0;
 
@@ -261,10 +260,25 @@ int main(int argc, char *argv[])
                "## Exiting (with return code -1).\n");
         return -1;
     }
-    if (control_and_measurement_parameters.request_to_turn_off) {
-        control_and_measurement_parameters.max_runtime_seconds = 1;
-    }
 
+    // Set the runtime of the program.
+    switch (operation_mode) {
+        case operation_mode_turn_off:
+            control_and_measurement_parameters.max_runtime_seconds = 1;
+            break;
+
+        case operation_mode_system_identification:
+            control_and_measurement_parameters.max_runtime_seconds = sys_ident.max_runtime_seconds;
+            break;
+
+        case operation_mode_control:
+            control_and_measurement_parameters.max_runtime_seconds = ctrl.max_runtime_seconds;
+            break;
+
+        case operation_mode_test:
+            control_and_measurement_parameters.max_runtime_seconds = 5;
+            break;
+    }
 
     // Init logging and log some general parameters
     if (!control_and_measurement_parameters.request_to_turn_off) {
