@@ -1,23 +1,47 @@
 #include "logging.h"
 
-int logSignalSample(FILE *log_fid, int index, int time_ms,
-                    double temperature,
-                    double pwm_controller,
-                    int bWriteHeader) {
+int
+logSignalSample(measurement_logging* logging,
+                control_parameters* control_params,
+                time_keeping* time_params,
+                reflow_oven_signals* oven_signals,
+                controller* ctrl)
+{
 
-    if (!log_fid) {
+    if (!logging) {
         return -1;
     }
 
-    if (bWriteHeader) {
-        fprintf(log_fid, "Index,Time (ms),Temperature (C),pwm_controller (percent)\n");
+    if (!logging->log_fid) {
+        return -1;
+    }
+
+    if (!control_params || !time_params || !oven_signals) {
+        return -1;
+    }
+
+    if (logging->first_log_call) {
+        fprintf(logging->log_fid,
+                "Index,"                           // First column
+                "Time (ms),"                       // Second column
+                "Oven temperature (C),"            // Third column
+                "Ambient temperature (C),"         // 4th column
+                "PWM controller (percent),"        // 5th column
+                "Thermocouple open,"               // 6th column
+                "Reference temperature (C)\n");    // 7th column
+        logging->first_log_call = 0;
     }
 
     //
-    fprintf(log_fid, "%05i,%09i,%06.2f,%06.2f\n",
-            index, time_ms,
-            temperature,
-            pwm_controller);
+    fprintf(logging->log_fid,
+            "%05i,%09i,%06.2f,%05.2f,%06.2f,%1i,%06.2f\n",
+            oven_signals->index,
+            time_params->diff_ms,
+            oven_signals->oven_temperature_deg_C,
+            oven_signals->ambient_temperature_deg_C,
+            oven_signals->pwm_controller_percent,
+            oven_signals->thermocouple_is_open,
+            ctrl->reference_deg_C);
 
     return 0;
 }

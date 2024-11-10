@@ -245,3 +245,43 @@ The parameters of this PI controller are parameterized by the Ziegler-Nichols me
 See also the following block diagram overview.
 
 ![Block diagram overview](blockdiagram_overview.png)
+
+## General todos
+
+- Update resistors (1k, not 3.9k, 2 times) on the Tiva board
+- Add note to add LED signaling open thermocouple
+- Add note to add LED signaling request to open door (manually)
+- Adjust profile to allow for
+  - more preheat time
+  - higher peak temperature
+  - longer reflow time
+- Add manual with important points, for instancee
+  - check for polarity of diodes and LEDs
+  - Alignment of ICs
+
+## Reference solder profiles
+
+- https://www.7pcb.com/blog/lead-free-reflow-profile
+- Data sheet of my solder paste
+  https://de.beta-layout.com/elektronik-shop/loetzinn-lotpaste/10753-smd-lotpaste-iso-cream/
+
+## Solder reports
+
+### First SMD soldering with this setup (Oct-23, 2024)
+
+- Lead-free HASL PCB (that is, no ENIG)
+- No uC soldered (otherwise ENIG required)
+- Stencil is required
+- Soldered components: 0805 C, 0805 R (contain labels), Diodes, LEDs, OpAmps and other ICs
+- Some parts on the PCB did not solder well --> longer preheat time, higher peak temperature, longer reflow time
+- Fragmented setup was quite a mess --> higher integration of controller boards, fixture of the BMP280
+- Power via lab supply --> Use TDK Lambdas in the future
+- Timing of door opening to be made easier
+- Application of solder paste --> not too much, also remove where there is too much before placing the part
+- Add note to check for polarity of diodes and LEDs
+- Reworking requires (no clean) flux
+
+Time above 217 deg C: 52.5 seconds (with opening the door)<br />
+Time between 150 and 180 deg C: 77.0 seconds<br />
+Peak temperature: 237.0 deg C
+

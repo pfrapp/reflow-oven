@@ -1,0 +1,7 @@
+BasedOnStyle: Mozilla
+IndentWidth: 4
+ContinuationIndentWidth: 4
+AlignConsecutiveAssignments: true
+ColumnLimit: 100
+SpacesBeforeTrailingComments: 4
+AlignTrailingComments: true

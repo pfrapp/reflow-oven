@@ -84,7 +84,7 @@ int8_t bmp2_compensate_data(const struct bmp2_uncomp_data *uncomp_data,
                             struct bmp2_data *comp_data,
                             struct bmp2_dev *dev)
 {
-    int8_t rslt;
+    int8_t rslt = BMP2_OK;
 
     if (dev == NULL) {
         return BMP2_E_NULL_PTR;
