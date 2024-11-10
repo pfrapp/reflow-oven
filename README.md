@@ -248,7 +248,6 @@ See also the following block diagram overview.
 
 ## General todos
 
-- Update resistors (1k, not 3.9k, 2 times) on the Tiva board
 - Add note to add LED signaling open thermocouple
 - Add note to add LED signaling request to open door (manually)
 - Adjust profile to allow for
