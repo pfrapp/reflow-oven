@@ -10,13 +10,9 @@
 
 
 // Notwendige Aenderungen:
-// - 20 mm mehr Platz hin zum Stromanschluss (/)
-// - Loecher muessen deutlich hoeher sein (/)
-// - Wand muss 10 mm hoeher sein (/)
-// - Bohrungen fuer Deckel vorsehen (/)
-// - Befestigung fuer uC vorsehen (/)
-// - Platz fuer Temperaturmessverstaerker vorsehen (/)
-// - Anschluss fuer Temperatursensor vorsehen (/)
+// - Noch mehr Platz beim Stromanschluss vorsehen
+// - Bohrungen fuer das Tiva Board mit Impedance Converter einfuegen
+// - Deckel an der Seite abschliessen
 
 
 g_fn = 90;
