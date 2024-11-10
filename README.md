@@ -190,11 +190,36 @@ as the OpAmp needs a dual rail supply.
 
 ### Modelling of the reflow oven dynamics
 
-The plant is modelled by a time delay followed by a first-order lag element.
-The parameters of the plant are infered by applying a step funtion
+The plant is modelled by a time delay followed by two first-order lag elements.
+
+The parameters of the plant are identified by applying a step function
 onto the oven. A 30% and 50% PWM signal is used for the step height.
 Also, a 100% PWM step is applyied until a temperature of 100 deg C is reached.
 In that case, also the cooling down is measured.
+
+Here are some more details for the motivation of a first-order lag.
+Note that we assume that there are two in order to model the
+different behavior when heating and when cooling.
+```
+d_theta/dt = q_zu - q_ab
+
+q_zu = K*u
+q_ab = alpha*theta
+
+K ... Proportional zur Leistung des Ofens
+theta ... Abkuehlkoeffizient
+
+d_theta/dt = K*u - alpha*theta
+
+d_theta/dt + alpha*theta = K*u
+
+s*Theta + alpha*Theta = K*U
+
+(s + alpha) * Theta = K * U
+
+G = Theta / U = K/(s + alpha)
+
+```
 
 ### Control design
 
