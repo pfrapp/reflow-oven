@@ -27,15 +27,20 @@ g_M2_thread_diameter = 3.2;
 g_M2_thread_depth    = 4.1;
 g_M2_through_hole_diameter = 2.4;
 
+width = 11;
+height = 25;
+
+roundness = 2;
+
 module entity() {
     difference() {
         union() {   
             // Cube
-            translate([-15.0/2+1,-25.0/2+1,10]) {
+            translate([-(width-roundness)/2,-(height-roundness)/2,10]) {
                 minkowski() {
                 sphere(r = 1, $fn = g_fn);
-                linear_extrude(20-2, center=true)
-                    square([15-2, 25-2]);
+                linear_extrude(20-roundness, center=true)
+                    square([width-roundness, height-roundness]);
                 }
             }
             linear_extrude(3, center=false)
