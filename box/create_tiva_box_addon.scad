@@ -119,6 +119,9 @@ module entity() {
         translate([52,145,0])
             halter_loecher_hutschiene([-10, 15], [0]);
     }
+    translate([-40,70,0])
+        rotate([0,0,0])
+            import("./bmp280_addon.stl");
 }
 
 
