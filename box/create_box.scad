@@ -67,7 +67,7 @@ module halter_hutschiene(pattern_x, pattern_y) {
     }
 }
 
-
+// M3
 module halter_loecher(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {
@@ -80,6 +80,7 @@ module halter_loecher(pattern_x, pattern_y) {
     }
 }
 
+// M4
 module halter_loecher_hutschiene(pattern_x, pattern_y) {
     for (x = pattern_x) {
         for (y = pattern_y) {

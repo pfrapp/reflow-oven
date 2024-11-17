@@ -35,20 +35,72 @@ module halter_loecher(pattern_x, pattern_y) {
     }
 }
 
+module halter_hutschiene(pattern_x, pattern_y) {
+    for (x = pattern_x) {
+        for (y = pattern_y) {
+            translate([x,y,0]) {
+                cylinder(d=12, h=16, $fn=g_fn);
+            }
+        }
+    }
+}
+
+// M4
+module halter_loecher_hutschiene(pattern_x, pattern_y) {
+    for (x = pattern_x) {
+        for (y = pattern_y) {
+            translate([x,y,0]) {
+                translate([0,0,7.8])
+                    cylinder(d=5.6, h=8.2, $fn=g_fn);
+                cylinder(d=4.6, h=16, $fn=g_fn);
+            }
+        }
+    }
+}
+
 
 module verbindung_halter() {
     // Grundform
-    grundform_points = [[-52, -52], [-52, 52], [52, 52], [52, -52],
-                        [-42, -52],
-                        [0, -52], [0, --42], [-42, --42],
-                        [-42, -42], [--42, -42], [--42, --42],
-                        [0, --42], [0, -52]
+    grundform_points = [[-52, -52],
+                        [-52, 52],
+                        [52, 52],
+                        [52, -52],
+                        [0, -52],
+                        [0, 42],
+                        [-42, 42],
+                        [-42, -42],
+                        [42, -42],
+                        [42, 42],
+                        [0, 42],
+                        [0, -52]
                        ];
-    linear_extrude(3.0)
+    // Extend to the rail.
+    hutschiene_attachment_points = [
+                        [0, 52],
+                        [52, 52],
+                        [85, 154],
+                        [30, 154],
+                        [0, 52]
+    ];
+    linear_extrude(3.0) {
         minkowski() {
             polygon(grundform_points);
             circle(r=2, $fn = g_fn);
         }
+        difference() {
+            minkowski() {
+                polygon(hutschiene_attachment_points);
+                circle(r=2, $fn = g_fn);
+            }
+            // Subtract the same shape, but down-scaled.
+            translate([10, 25, 0])
+                scale([0.7, 0.7, 1.0])
+                    minkowski() {
+                        polygon(hutschiene_attachment_points);
+                        circle(r=2, $fn = g_fn);
+                    }
+        }
+    }
 }
 
 module entity() {
@@ -57,10 +109,19 @@ module entity() {
             translate([0,0,0])
                 halter(g_bohrmuster_tiva_board_x, g_bohrmuster_tiva_board_y);
             verbindung_halter();
+            // Hutschiene
+            translate([52,145,0])
+                halter_hutschiene([-10, 15], [0]);
         }
         translate([0,0,0])
             halter_loecher(g_bohrmuster_tiva_board_x, g_bohrmuster_tiva_board_y);
+        // Loecher zur Befestigung der Hutschiene
+        translate([52,145,0])
+            halter_loecher_hutschiene([-10, 15], [0]);
     }
+    translate([-40,70,0])
+        rotate([0,0,0])
+            import("./bmp280_addon.stl");
 }
 
 
