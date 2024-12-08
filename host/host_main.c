@@ -472,7 +472,7 @@ int main(int argc, char *argv[])
         printf("Reference temperature: %6.2f deg C\n", ctrl.reference_deg_C);
         printf("PWM controller signal: %6.2f %%\n", current_reflow_oven_signals.pwm_controller_percent);
         if (time_sec > 550.0+40.0) {
-            printf("Please open the door now!\n");
+            printf("\n\n#### Please open the door now! ############################################################\n\n\n");
         }
 
         // Log to file.
