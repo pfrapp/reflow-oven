@@ -225,7 +225,7 @@ See also the following block diagram overview.
 
 ## Solder reports
 
-### First SMD soldering with this setup (Oct-23, 2024)
+### First SMD soldering with this setup (Oct-30, 2024)
 
 - Lead-free HASL PCB (that is, no ENIG)
 - No uC soldered (otherwise ENIG required)
