@@ -804,6 +804,13 @@ int main(void)
         // -------------------------------------------------------------------------------------------
         //
 
+
+        // Toggle down and up before actually trying to read the MAX6675
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);  // <-- This should now really be 3.3V, not 1.0V
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+
         // Read the digital thermocouple MAX6675 (blocking).
         //SSIDataGet(SSI2_BASE, &ui32DigitalThermocoupleData);
         ui32DigitalThermocoupleData = 0;
@@ -823,7 +830,16 @@ int main(void)
 
 //        while (SSIBusy(SSI2_BASE)) {}
 
+        // Wait for a short delay (e.g., 23 us)
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+
         // De-assert CS (inactive high)
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
+
+        // Toggle down and up again
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
         GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
 
         // Hinweis: Das Datenblatt des MAX6675 sagt:
