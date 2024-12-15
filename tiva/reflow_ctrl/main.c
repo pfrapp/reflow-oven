@@ -806,8 +806,8 @@ int main(void)
         // Assert CS (active low)
         GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
 
-        // Wait for a short delay (e.g., 1ms) for the MAX6675 to prepare data
-        SysCtlDelay(SysCtlClockGet() / (1000 * 3));
+        // Wait for a short delay (e.g., 23 us) for the MAX6675 to prepare data
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
 
         // Sending dummy data to generate clock signals
         SSIDataPut(SSI2_BASE, 0x0000);
