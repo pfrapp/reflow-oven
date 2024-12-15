@@ -667,6 +667,9 @@ int main(void)
     // Configure PB5 as a GPIO output for manual CS control
     GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_5);
 
+    // Enable the pull-up resistor on PB5
+    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+
     // Configure the pins for SSI functionality
     GPIOPinTypeSSI(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7);
 
