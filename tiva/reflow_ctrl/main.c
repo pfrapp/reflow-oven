@@ -667,6 +667,10 @@ int main(void)
     // Configure PB5 as a GPIO output for manual CS control
     GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_5);
 
+    // Enable push-pull on PB5
+    // (same as for PF4)
+    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD);
+
     // Configure the pins for SSI functionality
     GPIOPinTypeSSI(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7);
 
@@ -800,14 +804,21 @@ int main(void)
         // -------------------------------------------------------------------------------------------
         //
 
+
+        // Toggle down and up before actually trying to read the MAX6675
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);  // <-- This should now really be 3.3V, not 1.0V
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+
         // Read the digital thermocouple MAX6675 (blocking).
         //SSIDataGet(SSI2_BASE, &ui32DigitalThermocoupleData);
         ui32DigitalThermocoupleData = 0;
         // Assert CS (active low)
         GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
 
-        // Wait for a short delay (e.g., 1ms) for the MAX6675 to prepare data
-        SysCtlDelay(SysCtlClockGet() / (1000 * 3));
+        // Wait for a short delay (e.g., 23 us) for the MAX6675 to prepare data
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
 
         // Sending dummy data to generate clock signals
         SSIDataPut(SSI2_BASE, 0x0000);
@@ -819,7 +830,16 @@ int main(void)
 
 //        while (SSIBusy(SSI2_BASE)) {}
 
+        // Wait for a short delay (e.g., 23 us)
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+
         // De-assert CS (inactive high)
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
+
+        // Toggle down and up again
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, 0);
+        SysCtlDelay(SysCtlClockGet() / (100000 * 3));
         GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
 
         // Hinweis: Das Datenblatt des MAX6675 sagt:
