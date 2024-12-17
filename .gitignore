@@ -32,3 +32,6 @@
 /thermo-sensor-analog/fab/*
 /thermo-sensor-digital/fab/*
 /tiva-board/fab/*
+
+# VS Code settings
+/.vscode/*

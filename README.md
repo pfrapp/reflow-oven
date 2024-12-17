@@ -9,6 +9,7 @@ In general, it will help to move away from THT (through hole technology)
 boards and enter the realm of SMT (surface mount technology) boards.
 This saves space, helps to get rid of evaluation-board-style setups,
 and enables fully embedded circuits.
+It basically makes the PCBs more professional and less tinker-ish.
 
 This project is inspired by a reflow oven that I had at the university.
 It was a predecessor of this one that you can currently buy at Beta Layout.
@@ -19,11 +20,12 @@ https://www.instructables.com/DIY-REFLOW-OVEN/
 that shows how to build a DIY oven.
 
 The latter resource ends up with a self-contained oven, as the author wants
-to be able to use it as a tool.
+to be able to use it as a stand-alone tool.
 It looks really professional and solid.
 
 In this project, I just want to get the oven working in a first step.
-Furthermore, I want to use the oven to build an improved version of the controller board.
+Furthermore, I want to use the oven to build an improved version of the controller board
+(kind of in a bootstrapping manner).
 Also, the oven shall be usable and controllable from my computer.
 For this reason, I will not disassemble the oven itself nor use an LCD
 display, but just create an MVP which is a controller that
@@ -33,18 +35,23 @@ uses the actual oven as is.
 
 The general idea is to use an off-the-shelf pizza oven as the central
 heating element or oven.
-In the process of reflow solering, we need to ensure that the temperature
+In the process of reflow soldering, we need to ensure that the temperature
 follows a *reflow soldering profile*.
 
 Therefore, we use a temperature probe to measure the temperature and
-feed it back to a microcontroller.
+feed it back to a controller which generates the control signal.
 
-The uC in turn generates a control signal. This is a PWM signal,
+This is a PWM signal,
 as the temperature dynamics is very slow and hence acts as a natural
 low-pass filter.
-As the uC can only provide the signal, but not the actual power,
-we use a solid-state relay (SSR) in order to transform the uC signal
+As the controller can only provide the signal, but not the actual power,
+we use a solid-state relay (SSR) as the actuator
+in order to transform the uC signal
 to a mains voltage signal.
+
+The controller algorithm runs on a Raspberry Pi. It is connected via
+USB to a Cortex M4 microcontroller. The latter is used
+to acquire the temperature signal and to create the PWM signal.
 
 ## Components
 
@@ -54,7 +61,6 @@ Here is an overview of the essential required components.
 |--------------------------|-------------------|--------------------------------------------------------|---------------|-----------------|---------------|
 | SSR                      | Finder            | Steck-/Printrelais, 1x UM, 250V/10A, 5V, RM3,2         | Reichelt      | FIN 43.41.7 5V  | 5.95          |
 | Temperatur probe         | UNI-T             | Temperaturfuehler, Typ K, universal                    | Reichelt      | UT TF-K         | 3.95          |
-| ~~Arduino Uno~~          | ~~Arduino~~       | ~~Arduino A000066 Board UNO Rev3 DIL Core ATMega328~~  | ~~Voelkner~~  | ~~A435401~~     | ~~22.29~~     |
 | Cortex M4 Eval Board     | TI                | TM4C1236 Evaluation Board with breakout pins           | DigiKey       | 2314937         | ca. 18        |
 | Pizza oven               | Severin           | TO 2045 Oven, 1500 W, 100 to 230 deg C                 | Amazon        |                 | 60            |
 | Fuse                     |                   | Feinsicherung 5x20mm, superflink (ff), 8A              | Reichelt      | ESKA 520.126    | ca. 2         |
@@ -99,16 +105,11 @@ Resources
 
 ### Microcontroller
 
-The original plan was to use an Arduino Uno.
+We use a Cortex M4 on a Tiva evaluation board.
+It can be connected to the Raspberry Pi via USB.
+The Raspberry Pi is connected to the host PC via Wi-Fi.
 
-However, due to my better experience with the TI Tiva family,
-I decided to use the Tiva.
-It can be connected to the host PC via USB.
-
-Another benefit of this setup is that the direct host PC connection can
-be replaced by a Raspberry Pi that is in turn connected to
-the host PC via Wi-Fi.
-While this setup is a bit more complex, it allows
+This allows
 for the complete galvanic isolation between host PC
 and reflow oven controller.
 
@@ -118,56 +119,10 @@ The controller board is a two-stage amplifier.
 The signal from the microcontroller is first amplified using a BJT.
 This signal is then used to control a relay.
 
-### First version
+Yet another stage is present on the Tiva board: It turned out that the
+uC pins cannot reliably drive the BJT, so I introduced an impedance converter
+using an OpAmp, see the following subsection.
 
-The first version (revision 1.0.0) of the board has some flaws:
-* The transistor connection between collector and emitter is shorted. Potential reasons
-    * Solder bridges
-    * Defect part
-    * Defect board
-  
-  As a consequence, the red LED is always on.
-* The yellow LED is not bright enough with 3.3 V (not even with 5.0 V)
-* The LEDs have a much higher forward voltage than I thought they have (red and yellow around 2 V,
-  green even 3.3 V)
-* Not enough voltage to drive the relay
-
-  Note: The voltage between TP4 and TP5 is 0.566 V, which (at 22 Ohm) corresponds to 25.7 mA.
-  According to the datasheet of the 333-2SURC/S400-A8 (red LED), the forward voltage is 2 V, which
-  is also what I measured.
-
-
-Analysis of the defects:
-
-* To address the shorted transistor:
-    * Leave for some space between PCB and transistor to reduce the chance of solder bridges
-    * Measure another PCB
-    * Change the part
-* To address the yellow LED: reduce value of R1 (smaller than 1k)
-* To have enough voltage for driving the relay (without removing the red LED and replace it by a connection):
-    Use +7 V instead of + 5 V to drive the relay.
-* Also: Use less current wherever possible for the LEDs. Measure what current they need to be "bright".
-
-Measurements
-* 5 V supply voltage
-    * TP3 shows 4.9 V
-    * TP4 shows 2.975 V
-    * TP5 shows 2.420 V
-    * R2 measures 21.9 Ohm (between TP4 and TP5)
-    * R3 measures 0.99 kOhm
-    * Current through red LED: U = R*I --> I = U/R = (2.975-2.420) V / 22 Ohm = 0.555 V / 22 Ohm = 25.23 mA
-    * Voltage drop over red LED: 4.9 V - 2.975 V = 1.925 V
-    * Voltage between R3 and D3: 2.500 V
-    * Voltage drop over R2: 4.9 V - 2.500 V = 2.4 V
-    * Voltage drop over D3: 2.5 V
-    * Current through green LED: U = R*I --> I = U/R = 2.4 V / 990 Ohm = 2.42 mA
-    * Voltage drop over yellow LED (when bright) is 2 V
-    * The yellow LED needs 10 mA to be bright
-    * Base Emitter Voltage of Transistor is 0.75 V
-  
-Set R1 to 56 Ohm?
-
-Eigentlich reichen auch 5 mA fuer die gelbe LED, d.h. R1 = 100 Ohm.
 
 ### Impedance converter
 
@@ -221,10 +176,14 @@ G = Theta / U = K/(s + alpha)
 
 ```
 
+Later a more complex model is used. You can find it in the Jupyter notebook.
+
 ### Control design
 
-A PI controller is used for temperature control.
-The parameters of this PI controller are parameterized by the Ziegler-Nichols method.
+A PID controller is used for temperature control.
+The parameters of a PI controller have been parameterized by the Ziegler-Nichols method.
+Based on that, a PID controller has been manually tuned using the experimentally
+identified plant.
 
 
 ## Tiva pin usage and connection
@@ -254,7 +213,7 @@ See also the following block diagram overview.
   - more preheat time
   - higher peak temperature
   - longer reflow time
-- Add manual with important points, for instancee
+- Add manual with important points, for instance
   - check for polarity of diodes and LEDs
   - Alignment of ICs
 
@@ -266,7 +225,7 @@ See also the following block diagram overview.
 
 ## Solder reports
 
-### First SMD soldering with this setup (Oct-23, 2024)
+### First SMD soldering with this setup (Oct-30, 2024)
 
 - Lead-free HASL PCB (that is, no ENIG)
 - No uC soldered (otherwise ENIG required)
