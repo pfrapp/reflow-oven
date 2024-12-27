@@ -209,10 +209,6 @@ See also the following block diagram overview.
 
 - Add note to add LED signaling open thermocouple
 - Add note to add LED signaling request to open door (manually)
-- Adjust profile to allow for
-  - more preheat time
-  - higher peak temperature
-  - longer reflow time
 - Add manual with important points, for instance
   - check for polarity of diodes and LEDs
   - Alignment of ICs
@@ -243,3 +239,81 @@ Time above 217 deg C: 52.5 seconds (with opening the door)<br />
 Time between 150 and 180 deg C: 77.0 seconds<br />
 Peak temperature: 237.0 deg C
 
+### Second SMD soldering (Dec-23, 2024)
+
+#### Compared with the first SMD soldering, I changed the following things:
+- Adjusted solder temperature profile with the goal to allow for
+  - more preheat time (goal reached)
+  - higher peak temperature (not reached, peak temperature was actually slightly lower)
+  - longer reflow time (goal reached)
+- Better solder paste application
+  - I made sure to apply the solder paste in a single round. That means,
+    I ensured that I had enough of the paste on the upper edge
+    of the stencil.
+  - Then I went down slowly *once* while pressing firmly onto the stencil.
+    It is important to not go back and forth (potentially allowing for too much solder paste).
+  - The described procedure favors less solder paste being applied.
+    As a consequence, I did not have to remove any surplus solder paste.
+- I did *not* use a separate PCB to attach the thermocouple.
+  Rather than that, I braided the thermocouple wire trough the grating of the grillage.
+  I made sure that the tip was directly in between two grates, thus avoiding any contact
+  of the termocouple tip with the metal grates (or with a dedicated PCB).
+- I made the hint to open the door more prominent so that it could be
+  seen when standing at the oven and looking on to the computer screen.
+- I did solder a microcontroller. It was the 64-pin TM4C123GH6PM.
+  Note that I ordered lead-free HASL (that is, the ENIG finish was not necessary).
+
+#### Observations and facts
+  - When opening the door, the thermocouple was detected as open, hence
+    resulting in non-usable temperature measurements.
+    As this was the cool-down phase anyway, no harm was induced.
+  - I slipped while placing the Cortex onto the PCB.
+    Apparently that was not a show-stopper.
+    As can be seen on the magnified pictures I took, the solder paste
+    had not been smeared away from the Cortex, but rather only between the pins.
+  - The overall solder result was surprisingly good. I did not have to do any
+    reworking and hence also did not need to use the no-clean flux.
+  - It was raining, but I wanted to finish before Christmas, so I used an umbrella
+    to protect the oven.
+
+#### Open todos and fixes after this second soldering round
+- USB Stencil checken (also ob Anmerkungen von jlcpcb umgesetzt wurden, erst in KiCad Lib, dann im Projekt)
+- Highlight beim Bestuecken (z.B. eine PDF Seite pro Teil, erstellen via KiCad Python Script)
+- Sanft positionieren (z.B. Halter fuer Pinzette konstruieren?)
+- Dioden Polarity dokumentieren
+- LEDs Polarity dokumentieren (fuer jede einzelne LED, da potentiell unterschiedlich pro Typ und zumindest unterschiedlich markiert)
+  - Bei "Tetris" artigem Bild ist das kleine Quadrat die Kathode
+  - Bei Dreieck ist die Spitze die Kathode
+  - Auf der Vorderseite gibt es einen kleine gruene Markierung bei der Kathode
+  - Auf dem Silk ist die geschlossene Seite die Kathode, die Anode ist offen
+- LED Farben fixen im Schematic (2 mehr blue, 2 weniger gruen)
+- Silk fuer Montage USB (also genaue Ausrichtung)
+- Cortex Stencil checken (unterschiedlich grosse Luecken auf den Seiten)
+  --> hat letztlich nichts gemacht
+- SMD Bauteile einsortieren
+- Inventur und nachbestellen, auch Resistors, Caps.
+- Art Kreuze am Stencil fuer Ausrichtung (in allen 4 Ecken)
+- Thermocouple open/closed sollte beides ueber LED direkt sichtbar sein
+- Reflow Oven braucht einen Baking Modus (verschiedene Dauern und Temperaturen sollten auswaehlbar sein)
+- Spannungsversorgung +12V/-12V auf einen Stecker packen, damit keine unipolare Spannungsversorgung moeglich ist (die mir schon mal den uC kaputt gemacht hat)
+- Widerstand oder Zener auf PF4 Signal legen
+```
+(GPIO Output) --- [ 4.7 kΩ Resistor ] ---+--- (OpAmp Non-Inverting Input)
+                                          |
+                                    [ 3.3 V Zener Diode ]
+                                          |
+                                         GND
+```
+
+#### Output of the Jupyter script for solder profile analysis
+
+Time above 217 deg C: 114.99984027777778 seconds (with opening the door)<br />
+Time between 150 and 180 deg C: 91.99987222222222 seconds<br />
+Peak temperature: 1023.75 deg C
+
+Note that there was an error due to the thermocouple being open.
+The values are rather<br />
+
+Time above 217 deg C: 60 seconds (with opening the door)<br />
+Time between 150 and 180 deg C: 91.99987222222222 seconds<br />
+Peak temperature: 233 deg C
