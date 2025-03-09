@@ -218,6 +218,10 @@ See also the following block diagram overview.
 - https://www.7pcb.com/blog/lead-free-reflow-profile
 - Data sheet of my solder paste
   https://de.beta-layout.com/elektronik-shop/loetzinn-lotpaste/10753-smd-lotpaste-iso-cream/
+- TI application report
+  **SPRABY1A MSL Ratings and Reflow Profiles** \
+  https://www.ti.com/lit/an/spraby1a/spraby1a.pdf?ts=1741440364541
+
 
 ## Solder reports
 
