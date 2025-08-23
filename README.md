@@ -83,6 +83,18 @@ Attaching 5 V via a 22 Ohm resistor to A1, and putting A2 on ground, makes pins 
 resistance, connectivity test is positive).
 Pins 11 and 12 are then disconnected.
 
+Bei 5 V und 120 Ohm in Summe (97 vom Relais, 22 vom Vorwiderstand) erreichen wir den Bemessungsstrom von ca. 40 mA.
+5000 mV / 120 Ohm = 42 mA.
+
+Bei 12 V und 300 Ohm in Summe erhalten wir ebenfalls 12000 mV / 300 Ohm = 40 mA.
+Die 300 Ohm setzen sich zusammen aus den 97 Ohm des Relais sowie aus 200 Ohm Vorwiderstand.
+Dieser wiederum aus 150 Ohm sowie der Parallelschaltung einer Diode und ca. 100 Ohm.
+Die Diode hat 100 Ohm, so dass diese Parallelschaltung 50 Ohm hat.
+Die SMD Diode sollte, wie auch die bisherige THT Diode, 100 Ohm haben, da sie ca. 2.0 (THT 2.1) Volt
+Forward Voltage bei 20 mA hat.
+Parallelschaltung ist notwendig, damit der Bemessungsstrom von 40 mA erreicht wird, obwohl
+die Diode nur 20 mA hat.
+
 
 ### Temperature probe
 
