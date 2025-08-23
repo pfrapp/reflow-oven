@@ -471,6 +471,18 @@
     [
       "884d8f78-75d7-4449-b027-2ba1bd4eeac8",
       ""
+    ],
+    [
+      "e6f5d033-74f5-43d5-8e72-d0169a25c706",
+      "pwm_actuator"
+    ],
+    [
+      "58d7af1d-7239-4ab5-80a2-fcd44c87ce49",
+      "thermo_sensor"
+    ],
+    [
+      "736479ee-ce9b-4a2e-85d5-e1610ea35b1e",
+      "cortex_mcu"
     ]
   ],
   "text_variables": {}
