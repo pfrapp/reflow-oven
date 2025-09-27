@@ -969,6 +969,23 @@
     )
   )
 
+  (sheet (at 50.8 16.51) (size 39.37 20.32) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 0a73d0b6-1c79-4fd4-a20f-b791f052eabc)
+    (property "Sheetname" "power" (at 50.8 15.7984 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "power.kicad_sch" (at 50.8 37.4146 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "controller_v2"
+        (path "/884d8f78-75d7-4449-b027-2ba1bd4eeac8" (page "5"))
+      )
+    )
+  )
+
   (sheet (at 50.8 82.55) (size 39.37 24.13) (fields_autoplaced)
     (stroke (width 0.1524) (type solid))
     (fill (color 0 0 0 0.0000))
@@ -1027,6 +1044,23 @@
     (instances
       (project "controller_v2"
         (path "/884d8f78-75d7-4449-b027-2ba1bd4eeac8" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 53.34 165.1) (size 39.37 22.86) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 964bf84d-77ac-476f-9819-ab0bee82dc0c)
+    (property "Sheetname" "mcu_power" (at 53.34 164.3884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "mcu_power.kicad_sch" (at 53.34 188.5446 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "controller_v2"
+        (path "/884d8f78-75d7-4449-b027-2ba1bd4eeac8" (page "6"))
       )
     )
   )

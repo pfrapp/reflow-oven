@@ -483,6 +483,14 @@
     [
       "736479ee-ce9b-4a2e-85d5-e1610ea35b1e",
       "cortex_mcu"
+    ],
+    [
+      "0a73d0b6-1c79-4fd4-a20f-b791f052eabc",
+      "power"
+    ],
+    [
+      "964bf84d-77ac-476f-9819-ab0bee82dc0c",
+      "mcu_power"
     ]
   ],
   "text_variables": {}
